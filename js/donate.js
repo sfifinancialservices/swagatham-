@@ -542,7 +542,32 @@ document.addEventListener('DOMContentLoaded', function() {
         resendOtpBtn.disabled = true;
     }
     
-    rzpButton.addEventListener('click', async function() {
+    // Load Razorpay script dynamically if not already loaded
+    function loadRazorpayScript() {
+        return new Promise((resolve, reject) => {
+            if (window.Razorpay) {
+                resolve();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => {
+                console.log('Razorpay script loaded successfully');
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Failed to load Razorpay script');
+                reject(new Error('Failed to load Razorpay payment gateway'));
+            };
+            document.body.appendChild(script);
+        });
+    }
+    
+    rzpButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
         const name = document.getElementById('fullName').value;
         const email = document.getElementById('email').value;
         const phone = document.getElementById('phone').value;
@@ -560,60 +585,88 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        const options = {
-            "key": "rzp_test_qKbcwAmDW48jVS",
-            "amount": amount * 100,
-            "currency": "INR",
-            "name": "Swagatham Foundation",
-            "description": donationType === 'monthly' ? "Monthly Donation" : "One-Time Donation",
-            "image": "images/logo.png",
-            "handler": async function(response) {
-                try {
-                    const donationData = {
-                        amount: amount,
-                        paymentId: response.razorpay_payment_id,
-                        donationType: donationType,
-                        taxExemption: taxExemption
-                    };
-                    
-                    const success = await sessionManager.recordDonation(donationData);
-                    
-                    if (success) {
-                        successMessage.innerHTML = `
-                            Thank you for your donation of ₹${amount}!<br><br>
-                            <strong>Payment ID:</strong> ${response.razorpay_payment_id}
-                        `;
-                        
-                        donationModal.style.display = 'none';
-                        successModal.style.display = 'flex';
-                    } else {
-                        alert('Payment successful but there was an error saving your donation details.');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Payment successful but there was an error saving your donation details.');
-                }
-            },
-            "prefill": {
-                "name": name,
-                "email": email,
-                "contact": phone
-            },
-            "notes": {
-                "donation_type": donationType,
-                "tax_exemption": taxExemption ? "Yes" : "No"
-            },
-            "theme": {
-                "color": "#3399cc"
-            }
-        };
+        if (amount <= 0) {
+            alert('Please enter a valid donation amount');
+            return;
+        }
         
-        const rzp = new Razorpay(options);
-        rzp.open();
+        try {
+            // Show loading state
+            rzpButton.disabled = true;
+            rzpButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            // Ensure Razorpay is loaded
+            await loadRazorpayScript();
+            
+            const options = {
+                "key": "rzp_test_qKbcwAmDW48jVS", // Test key - replace with your actual key in production
+                "amount": amount * 100, // Razorpay expects amount in paise
+                "currency": "INR",
+                "name": "Swagatham Foundation",
+                "description": donationType === 'monthly' ? "Monthly Donation" : "One-Time Donation",
+                "image": "images/logo.png",
+                "handler": async function(response) {
+                    try {
+                        const donationData = {
+                            amount: amount,
+                            paymentId: response.razorpay_payment_id,
+                            donationType: donationType,
+                            taxExemption: taxExemption
+                        };
+                        
+                        const success = await sessionManager.recordDonation(donationData);
+                        
+                        if (success) {
+                            successMessage.innerHTML = `
+                                Thank you for your donation of ₹${amount}!<br><br>
+                                <strong>Payment ID:</strong> ${response.razorpay_payment_id}
+                            `;
+                            
+                            donationModal.style.display = 'none';
+                            successModal.style.display = 'flex';
+                        } else {
+                            alert('Payment successful but there was an error saving your donation details.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Payment successful but there was an error saving your donation details.');
+                    } finally {
+                        rzpButton.disabled = false;
+                        rzpButton.innerHTML = 'Pay with Razorpay';
+                    }
+                },
+                "prefill": {
+                    "name": name,
+                    "email": email,
+                    "contact": phone
+                },
+                "notes": {
+                    "donation_type": donationType,
+                    "tax_exemption": taxExemption ? "Yes" : "No"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        rzpButton.disabled = false;
+                        rzpButton.innerHTML = 'Pay with Razorpay';
+                    }
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+            
+        } catch (error) {
+            console.error('Payment initialization failed:', error);
+            alert('Payment system is currently unavailable. Please try again later.');
+            rzpButton.disabled = false;
+            rzpButton.innerHTML = 'Pay with Razorpay';
+        }
     });
     
     window.closeSuccessModal = function() {
         successModal.style.display = 'none';
     };
 });
-
