@@ -560,11 +560,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get Razorpay key from environment variable
-        const razorpayKey = process.env.RAZORPAY_KEY_SECRET || 'rzp_test_qKbcwAmDW48jVS'; // Fallback to test key if not in env
-        
         const options = {
-            "key": razorpayKey,
+            "key": "rzp_test_qKbcwAmDW48jVS",
             "amount": amount * 100,
             "currency": "INR",
             "name": "Swagatham Foundation",
@@ -619,3 +616,4 @@ document.addEventListener('DOMContentLoaded', function() {
         successModal.style.display = 'none';
     };
 });
+
