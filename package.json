@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.0.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0",
+    "twilio": "^5.7.1"
+  }
+}

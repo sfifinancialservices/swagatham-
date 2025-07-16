@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagatham Foundation - Senior Citizens Home</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/home.css">
+    <script src="js/hero-rotator.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="index-page">
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Swagatham Foundation Logo" class="logo">
+                <div class="foundation-name">
+                 
+                
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="about.html">About </a></li>
+                    <li><a href="facilities.html">Facilities</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="donate.html">Donate</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-right">
+                <div id="contactBtn" class="contact-button">
+                    <a href="tel:+919677134399" class="cta-button">
+                        <i class="fas fa-phone"></i> +91 96771 34399
+                    </a>
+                </div>
+                <button id="profileBtn" class="profile-btn">
+                    <i class="fas fa-user"></i> <span class="profile-text">Profile</span>
+                </button>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Profile View Modal -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal-container profile-view">
+        <button class="close-modal">&times;</button>
+        <h2>Your Profile</h2>
+        <div class="profile-content" id="profileContent">
+            <!-- Profile data will be loaded here -->
+        </div>
+        <div class="profile-actions" id="profileActions">
+            <!-- Edit button will be shown/hidden based on profileComplete status -->
+        </div>
+    </div>
+</div>
+
+<!-- Profile Edit Modal -->
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-container landscape-form">
+        <button class="close-modal">&times;</button>
+        <h2>Update Profile</h2>
+        <form id="profileForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editName">Full Name</label>
+                    <input type="text" id="editName" name="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="editEmail" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editDob">Date of Birth</label>
+                    <input type="date" id="editDob" name="editDob" required>
+                </div>
+                <div class="form-group">
+                    <label for="editGender">Gender</label>
+                    <select id="editGender" name="editGender" required>
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editAddress">Full Address</label>
+                <textarea id="editAddress" name="editAddress" rows="2" required></textarea>
+            </div>
+            
+            <h3 class="family-heading">Family Member Details (At least one)</h3>
+            <div class="family-members" id="familyMembersContainer">
+                <!-- Family members will be added here -->
+            </div>
+            
+            <button type="button" class="btn-secondary" id="addFamilyMember">+ Add Another Family Member</button>
+            <div class="form-actions">
+                <button type="button" class="btn-tertiary" id="cancelEdit">Cancel</button>
+                <button type="submit" class="btn-primary">Update Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg" style="background-image: url('images/hero-bg1.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('images/hero-bg2.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('images/hero-bg3.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('images/hero-bg4.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('images/hero-bg5.jpg');"></div>
+        <div class="hero-bg" style="background-image: url('images/hero-bg6.jpg');"></div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>Providing Love, Care & Dignity to Our Elders</h1>
+            <p>A peaceful home for senior citizens in Chennai</p>
+            <div class="hero-buttons">
+                <a href="donate.html" class="btn-primary">Donate Now</a>
+                <a href="about.html" class="btn-secondary">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <h2 class="section-title">About Swagatham Foundation</h2>
+                <p>Established by successful individuals aiming to give back to society, Swagatham Foundation provides a loving home for senior citizens who cannot stay with their families. Our facility offers comfortable living, nutritious food, and medical care in a peaceful environment.</p>
+                
+                <div class="founder-quote">
+                    <blockquote>"Giving back to society what we've received"</blockquote>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="150">0</span>
+                        <span class="stat-label">Seniors Cared For</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-count="2010">0</span>
+                        <span class="stat-label">Since Year</span>
+                    </div>
+                </div>
+                
+                <a href="about.html" class="btn-primary">Our Story</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition Cards -->
+    <section class="value-props">
+        <div class="container">
+            <h2 class="section-title">We Provide</h2>
+            <div class="cards-container">
+                <div class="card">
+                    <div class="card-icon">🛏️</div>
+                    <h3>Comfortable Living</h3>
+                    <p>Dormitory accommodations with all essentials including cots, mattresses, and utensils for peaceful living.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🍲</div>
+                    <h3>Healthy Nourishment</h3>
+                    <p>Nutritious vegetarian meals with special dishes during festivals as requested by our donors.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🩺</div>
+                    <h3>Medical Care</h3>
+                    <p>Regular checkups and emergency care with hospital referrals when needed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photo Gallery Preview -->
+    <section class="gallery-preview">
+        <div class="container">
+            <h2 class="section-title">Life at Swagatham</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="images/dormitory.jpg" alt="Clean dormitories">
+                    <div class="gallery-caption">Clean Dormitories</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="images/dining.jpg" alt="Dining area">
+                    <div class="gallery-caption">Dining Area</div>
+                </div>
+                <div class="gallery-item">
+                    <img src="images/activities.jpg" alt="Recreational activities">
+                    <div class="gallery-caption">Recreational Activities</div>
+                </div>
+            </div>
+            <a href="gallery.html" class="btn-primary">View Full Gallery</a>
+        </div>
+    </section>
+
+    <!-- Donation CTA -->
+    <section class="donation-cta">
+        <div class="container">
+            <div class="donation-content">
+                <h2>Your Support Brings Smiles to 100+ Seniors</h2>
+                <p>Help us continue providing love and care to our elderly residents</p>
+                
+                <div class="donation-options">
+                    <a href="donate.html" class="donation-btn">
+                        <i class="fas fa-hand-holding-heart"></i> One-time Donation
+                    </a>
+                    <a href="donate.html" class="donation-btn">
+                        <i class="fas fa-calendar-check"></i> Monthly Pledge
+                    </a>
+                    <a href="donate.html" class="donation-btn">
+                        <i class="fas fa-hands-helping"></i> Other Ways to Help
+                    </a>
+                </div>
+                
+                <div class="trust-badges">
+                    <div class="badge">
+                        <i class="fas fa-certificate"></i> Registered NGO
+                    </div>
+                    <div class="badge">
+                        <i class="fas fa-file-invoice-dollar"></i> 80G Tax Benefits
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Facilities Preview -->
+    <section class="facilities-preview">
+        <div class="container">
+            <h2 class="section-title">Our Facilities</h2>
+            <div class="facilities-grid">
+                <div class="facility-item">
+                    <div class="facility-icon"><i class="fas fa-tv"></i></div>
+                    <h3>Entertainment</h3>
+                    <p>TV, radio, and other recreational activities to keep our residents engaged.</p>
+                </div>
+                <div class="facility-item">
+                    <div class="facility-icon"><i class="fas fa-spa"></i></div>
+                    <h3>Wellness</h3>
+                    <p>Regular yoga and meditation sessions for physical and mental wellbeing.</p>
+                </div>
+            </div>
+            <a href="facilities.html" class="btn-primary">See All Facilities</a>
+        </div>
+    </section>
+
+    <!-- Profile Edit Modal -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-container landscape-form">
+            <button class="close-modal">&times;</button>
+            <h2>Update Profile</h2>
+            <form id="profileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editName">Full Name</label>
+                        <input type="text" id="editName" name="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" name="editEmail" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDob">Date of Birth</label>
+                        <input type="date" id="editDob" name="editDob" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editGender">Gender</label>
+                        <select id="editGender" name="editGender" required>
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAddress">Full Address</label>
+                    <textarea id="editAddress" name="editAddress" rows="2" required></textarea>
+                </div>
+                
+                <h3 class="family-heading">Family Member Details (At least one)</h3>
+                <div class="family-members" id="familyMembersContainer">
+                    <!-- Family members will be added here -->
+                </div>
+                
+                <button type="button" class="btn-secondary" id="addFamilyMember">+ Add Another Family Member</button>
+                <div class="form-actions">
+                    <button type="button" class="btn-tertiary" id="cancelEdit">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Contact Info</h3>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> City Office: 6, Kamadhenu 3rd St, Mogappair East, Chennai</p>
+                        <p><i class="fas fa-home"></i> Facility: Amudurmedu Village, Chennai</p>
+                        <p><i class="fas fa-phone"></i> +91 96771 34399</p>
+                        <p><i class="fas fa-envelope"></i> swagathamfoundation.oldagehome@gmail.com</p>
+                    </address>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/Swagatham-Foundation-1440815902866146"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.instagram.com/p/DJgLrWwyplf/?img_index=7"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/channel/UC3WJFBLv5bYwRrmcbWR1yoQ"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="facilities.html">Facilities</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Trust Registration</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 Swagatham Foundation. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

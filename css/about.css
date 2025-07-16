@@ -1,0 +1,265 @@
+/* About Page Hero */
+.about-hero {
+    height: 60vh;
+    min-height: 400px;
+    background: url('../images/hero-bg.jpg') no-repeat center center/cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.about-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero p {
+    font-size: 1.3rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Detailed About Section */
+.detailed-about {
+    padding: 80px 0;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about-history {
+    margin-bottom: 60px;
+}
+
+.about-history h2 {
+    color: var(--dark-blue);
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-align: center;
+}
+
+.about-history h3 {
+    color: var(--deep-sky-blue);
+    margin: 40px 0 20px;
+    font-size: 1.8rem;
+}
+
+.about-history p {
+    margin-bottom: 20px;
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+/* Trustees Section */
+.trustees-section {
+    margin: 80px 0;
+}
+
+.trustees-section h2 {
+    color: var(--dark-blue);
+    margin-bottom: 50px;
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.trustees-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+}
+
+.trustee-card {
+    background-color: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+    padding-bottom: 25px;
+}
+
+.trustee-card:hover {
+    transform: translateY(-10px);
+}
+
+.trustee-image {
+    height: 250px;
+    overflow: hidden;
+}
+
+.trustee-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.trustee-card h3 {
+    color: var(--dark-blue);
+    margin: 25px 0 8px;
+    font-size: 1.5rem;
+}
+
+.trustee-card p {
+    color: var(--deep-sky-blue);
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.trustee-title {
+    color: var(--dark-gray) !important;
+    font-size: 1rem;
+    font-weight: normal !important;
+    padding: 0 20px;
+    line-height: 1.5;
+}
+
+/* Donors Section */
+.donors-section {
+    background-color: var(--light-gray);
+    padding: 50px;
+    border-radius: 10px;
+    margin: 80px 0;
+}
+
+.donors-section h2 {
+    color: var(--dark-blue);
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+.donors-section p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.donors-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 30px 0;
+    columns: 2;
+    column-gap: 40px;
+}
+
+.donors-list li {
+    margin-bottom: 15px;
+    padding-left: 25px;
+    position: relative;
+    font-size: 1.1rem;
+}
+
+.donors-list li::before {
+    content: "•";
+    color: var(--deep-sky-blue);
+    font-weight: bold;
+    font-size: 1.5rem;
+    position: absolute;
+    left: 0;
+    top: -3px;
+}
+
+/* Achievements Section */
+.achievements {
+    background-color: var(--light-gray);
+    padding: 80px 0;
+}
+
+.achievements h2 {
+    color: var(--dark-blue);
+    margin-bottom: 50px;
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+}
+
+.achievement-card {
+    background-color: var(--white);
+    padding: 40px 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.achievement-icon {
+    font-size: 2.5rem;
+    color: var(--deep-sky-blue);
+    min-width: 60px;
+    text-align: center;
+}
+
+.achievement-content h3 {
+    color: var(--dark-blue);
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.achievement-content p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .trustees-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .about-hero p {
+        font-size: 1.3rem;
+    }
+    
+    .donors-list {
+        columns: 1;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .about-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .trustees-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .donors-section {
+        padding: 30px;
+    }
+}

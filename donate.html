@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate - Swagatham Foundation</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/donate.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body class="donate-page">
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Swagatham Foundation Logo" class="logo">
+            </div>
+
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="facilities.html">Facilities</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="donate.html" class="active">Donate</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-right">
+                <div id="contactBtn" class="contact-button">
+                    <a href="tel:+919677134399" class="cta-button">
+                        <i class="fas fa-phone"></i> +91 96771 34399
+                    </a>
+                </div>
+                <button id="profileBtn" class="profile-btn">
+                    <i class="fas fa-user"></i> <span class="profile-text">Profile</span>
+                </button>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Donation Page Content -->
+    <main class="donate-main">
+        <section class="donate-hero">
+            <h1>Support Our Elders</h1>
+            <p>Your donation makes a difference in the lives of our senior citizens</p>
+        </section>
+
+        <section class="donation-options">
+            <div class="container">
+                <div class="donation-cards">
+                    <div class="donation-card">
+                        <div class="donation-icon">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                        <h2>One-Time Donation</h2>
+                        <p>Make a single contribution to support our ongoing operations and care for our residents.</p>
+                        <div class="amount-options">
+                            <button class="amount-btn">₹500</button>
+                            <button class="amount-btn">₹1,000</button>
+                            <button class="amount-btn">₹2,500</button>
+                            <button class="amount-btn">₹5,000</button>
+                            <input type="number" placeholder="Other amount" class="custom-amount">
+                        </div>
+                        <button class="btn-primary donate-now-btn">Donate Now</button>
+                    </div>
+
+                    <div class="donation-card highlighted">
+                        <div class="donation-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h2>Monthly Pledge</h2>
+                        <p>Become a monthly donor and provide consistent support for our elders' needs.</p>
+                        <div class="amount-options">
+                            <button class="amount-btn">₹500/month</button>
+                            <button class="amount-btn">₹1,000/month</button>
+                            <button class="amount-btn">₹2,500/month</button>
+                            <input type="number" placeholder="Other amount" class="custom-amount">
+                        </div>
+                        <button class="btn-primary donate-now-btn">Start Monthly Giving</button>
+                    </div>
+
+                    <div class="donation-card">
+                        <div class="donation-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <h2>Other Ways to Give</h2>
+                        <p>Explore alternative donation methods that suit your preferences.</p>
+                        <ul class="other-options">
+                            <li><i class="fas fa-utensils"></i> Sponsor meals for a month</li>
+                            <li><i class="fas fa-pills"></i> Donate medical supplies</li>
+                            <li><i class="fas fa-bed"></i> Sponsor a resident's care</li>
+                            <li><i class="fas fa-handshake"></i> Corporate partnerships</li>
+                        </ul>
+                        <button class="btn-secondary">Learn More</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="donation-impact">
+            <div class="container">
+                <h2 class="section-title">Your Donation's Impact</h2>
+                <div class="impact-grid">
+                    <div class="impact-item">
+                        <div class="impact-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <h3>₹500</h3>
+                        <p>Provides one resident's meals for a week</p>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-icon">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                        <h3>₹1,500</h3>
+                        <p>Covers monthly medications for one resident</p>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <h3>₹5,000</h3>
+                        <p>Supports facility maintenance for a month</p>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>₹10,000</h3>
+                        <p>Funds medical checkups for all residents</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bank-details">
+            <div class="container">
+                <h2 class="section-title">Bank Transfer Details</h2>
+                <div class="details-card">
+                    <div class="bank-info">
+                        <p><strong>Account Name:</strong> Swagatham Foundation</p>
+                        <p><strong>Account Number:</strong> 113109000167331</p>
+                        <p><strong>Bank Name:</strong> City Union Bank</p>
+                        <p><strong>Branch:</strong> Chennai Annanagar</p>
+                        <p><strong>Account Type:</strong> Current Account</p>
+                        <p><strong>IFSC Code:</strong> CIUB0000113</p>
+                        <p><strong>UPI ID:</strong> swagatham.foundation@upi</p>
+                    </div>
+                    <div class="tax-benefits">
+                        <h3><i class="fas fa-file-invoice-dollar"></i> Tax Benefits</h3>
+                        <p>Donations to Swagatham Foundation are eligible for 50% tax exemption under Section 80G of the Income Tax Act.</p>
+                        <p>We will provide a receipt for all donations which can be used for tax exemption purposes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OTP Verification Modal -->
+        <div class="modal-overlay" id="otpModal">
+            <div class="modal-container">
+                <button class="close-modal">&times;</button>
+                <h2>Verify Your Number</h2>
+                <form id="otpForm">
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="Enter 10-digit mobile number">
+                    </div>
+                    <div class="form-group" id="otpFieldGroup" style="display: none;">
+                        <label for="otp">Enter OTP</label>
+                        <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP">
+                        <p class="otp-timer" id="otpTimer"></p>
+                        <button type="button" class="btn-secondary" id="resendOtpBtn" disabled>Resend OTP</button>
+                    </div>
+                    <button type="button" id="sendOtpBtn" class="btn-primary">Send OTP</button>
+                    <button type="button" id="verifyOtpBtn" class="btn-primary" style="display: none;">Verify & Continue</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Donation Form Modal -->
+        <div class="modal-overlay" id="donationModal">
+            <div class="modal-container">
+                <button class="close-modal">&times;</button>
+                <h2 id="modalTitle">Make a Donation</h2>
+                <form id="donationForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="donationType">Donation Type</label>
+                        <select id="donationType" name="donationType" disabled>
+                            <option value="one-time">One-Time Donation</option>
+                            <option value="monthly">Monthly Donation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" id="amount" name="amount" required readonly>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="taxExemption" name="taxExemption">
+                        <label for="taxExemption">I would like to receive tax exemption certificate</label>
+                    </div>
+                    <button type="button" id="rzp-button" class="btn-primary pay-now-btn">Pay with Razorpay</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Profile View Modal -->
+        <div class="modal-overlay" id="profileModal">
+            <div class="modal-container profile-view">
+                <button class="close-modal">&times;</button>
+                <h2>Your Profile</h2>
+                <div class="profile-content" id="profileContent">
+                    <!-- Profile data will be loaded here -->
+                </div>
+                <div class="profile-actions" id="profileActions">
+                    <!-- Edit button will be shown/hidden based on profileComplete status -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Edit Modal -->
+        <div class="modal-overlay" id="editProfileModal">
+            <div class="modal-container landscape-form">
+                <button class="close-modal">&times;</button>
+                <h2>Update Profile</h2>
+                <form id="profileForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editName">Full Name</label>
+                            <input type="text" id="editName" name="editName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">Email</label>
+                            <input type="email" id="editEmail" name="editEmail" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editDob">Date of Birth</label>
+                            <input type="date" id="editDob" name="editDob" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGender">Gender</label>
+                            <select id="editGender" name="editGender" required>
+                                <option value="">Select</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editAddress">Full Address</label>
+                        <textarea id="editAddress" name="editAddress" rows="2" required></textarea>
+                    </div>
+                    
+                    <h3 class="family-heading">Family Member Details (At least one)</h3>
+                    <div class="family-members" id="familyMembersContainer">
+                        <!-- Family members will be added here -->
+                    </div>
+                    
+                    <button type="button" class="btn-secondary" id="addFamilyMember">+ Add Another Family Member</button>
+                    <div class="form-actions">
+                        <button type="button" class="btn-tertiary" id="cancelEdit">Cancel</button>
+                        <button type="submit" class="btn-primary">Update Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="success-modal" id="successModal">
+            <div class="success-modal-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Payment Successful!</h2>
+                <p id="successMessage"></p>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="closeSuccessModal()">Close</button>
+                    <button class="btn-secondary" id="viewProfileBtn">View Profile</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Contact Info</h3>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> City Office: 6, Kamadhenu 3rd St, Mogappair East, Chennai</p>
+                        <p><i class="fas fa-home"></i> Facility: Amudurmedu Village, Chennai</p>
+                        <p><i class="fas fa-phone"></i> +91 96771 34399</p>
+                        <p><i class="fas fa-envelope"></i> swagathamfoundation.oldagehome@gmail.com</p>
+                    </address>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/Swagatham-Foundation-1440815902866146"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="facilities.html">Facilities</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Trust Registration</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 Swagatham Foundation. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/script.js"></script>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/donate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+</body>
+</html>

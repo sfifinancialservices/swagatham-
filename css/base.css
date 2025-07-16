@@ -1,0 +1,106 @@
+/* Base Styles */
+:root {
+    --sky-blue: #87CEEB;
+    --deep-sky-blue: #00BFFF;
+    --white: #FFFFFF;
+    --dark-blue: #1E3A8A;
+    --light-gray: #F8F9FA;
+    --warm-orange: #FFA07A;
+    --section-padding: 80px 0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--dark-blue);
+    font-size: 2.2rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: var(--deep-sky-blue);
+    margin: 15px auto;
+    border-radius: 2px;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--deep-sky-blue);
+    color: var(--white);
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+    display: inline-block;
+    background-color: var(--deep-sky-blue);
+    color: var(--white);
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid var(--white);
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+/* Responsive Base Styles */
+@media (max-width: 992px) {
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    :root {
+        --section-padding: 60px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    :root {
+        --section-padding: 50px 0;
+    }
+}

@@ -1,0 +1,436 @@
+/* Base Styles & Variables */
+:root {
+    --sky-blue: #87CEEB;
+    --deep-sky-blue: #00BFFF;
+    --white: #FFFFFF;
+    --dark-blue: #1E3A8A;
+    --light-gray: #F8F9FA;
+    --warm-orange: #FFA07A;
+    --section-padding: 80px 0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--light-gray);
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+    color: var(--dark-blue);
+    font-size: 2.2rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background: var(--deep-sky-blue);
+    margin: 15px auto;
+    border-radius: 2px;
+}
+
+.btn-primary {
+    display: inline-block;
+    background-color: var(--deep-sky-blue);
+    color: var(--white);
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--white);
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid var(--white);
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+/* Header Styles */
+.main-header {
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 10px ;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    height: 60px;
+    width: auto;
+}
+
+.foundation-name h1 {
+    color: var(--deep-sky-blue);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.foundation-name p {
+    color: var(--dark-blue);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+}
+
+.nav-list li a {
+    text-decoration: none;
+    color: var(--dark-blue);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.nav-list li a:hover {
+    color: var(--deep-sky-blue);
+    background-color: rgba(135, 206, 235, 0.1);
+}
+
+/* Highlight current page in navigation */
+.index-page .nav-list li a[href="index.html"],
+.about-page .nav-list li a[href="about.html"],
+.facilities-page .nav-list li a[href="facilities.html"],
+.gallery-page .nav-list li a[href="gallery.html"],
+.donate-page .nav-list li a[href="donate.html"],
+.contact-page .nav-list li a[href="contact.html"] {
+    color: var(--white);
+    background-color: var(--deep-sky-blue);
+}
+
+.contact-button .cta-button {
+    background-color: var(--deep-sky-blue);
+    color: var(--white);
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.contact-button .cta-button:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-2px);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    font-size: 1.5rem;
+    color: var(--deep-sky-blue);
+    cursor: pointer;
+}
+
+/* Hero Section - Shared */
+.hero {
+    height: 80vh;
+    min-height: 600px;
+    background: url('../images/hero-bg.jpg') no-repeat center center/cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* Page-specific hero sections */
+.about-hero,
+.facilities-hero,
+.gallery-hero,
+.donate-hero,
+.contact-hero {
+    height: 60vh;
+    min-height: 400px;
+    background: url('../images/hero-bg.jpg') no-repeat center center/cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+}
+
+.about-hero h1,
+.facilities-hero h1,
+.gallery-hero h1,
+.donate-hero h1,
+.contact-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero p,
+.facilities-hero p,
+.gallery-hero p,
+.donate-hero p,
+.contact-hero p {
+    font-size: 1.3rem;
+    position: relative;
+    z-index: 1;
+}
+
+.about-hero::before,
+.facilities-hero::before,
+.gallery-hero::before,
+.donate-hero::before,
+.contact-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* Footer */
+.main-footer {
+    background-color: var(--dark-blue);
+    color: var(--white);
+    padding: 60px 0 20px;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-col h3 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.footer-col h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    height: 2px;
+    background-color: var(--sky-blue);
+}
+
+.footer-col address p {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.footer-col address i {
+    margin-top: 3px;
+}
+
+.footer-col ul {
+    list-style: none;
+}
+
+.footer-col ul li {
+    margin-bottom: 10px;
+}
+
+.footer-col ul li a {
+    color: var(--white);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-col ul li a:hover {
+    color: var(--sky-blue);
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.social-icons a {
+    color: var(--white);
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+    color: var(--sky-blue);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .hero-content h1, 
+    .about-hero h1,
+    .facilities-hero h1,
+    .gallery-hero h1,
+    .donate-hero h1,
+    .contact-hero h1 {
+        font-size: 3rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-nav {
+        display: none;
+    }
+    
+    .contact-button {
+        display: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    .hero {
+        height: 70vh;
+        min-height: 500px;
+    }
+    
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.2rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1,
+    .about-hero h1,
+    .facilities-hero h1,
+    .gallery-hero h1,
+    .donate-hero h1,
+    .contact-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+}

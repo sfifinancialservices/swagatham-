@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery - Swagatham Foundation</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header-footer.css">
+    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="gallery-page">
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="images/logo.png" alt="Swagatham Foundation Logo" class="logo">
+                <div class="foundation-name">
+             
+                
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About </a></li>
+                    <li><a href="facilities.html">Facilities</a></li>
+                    <li><a href="gallery.html" class="active">Gallery</a></li>
+                    <li><a href="donate.html">Donate</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-right">
+                <div id="contactBtn" class="contact-button">
+                    <a href="tel:+919677134399" class="cta-button">
+                        <i class="fas fa-phone"></i> +91 96771 34399
+                    </a>
+                </div>
+                <button id="profileBtn" class="profile-btn">
+                    <i class="fas fa-user"></i> <span class="profile-text">Profile</span>
+                </button>
+                <div class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Gallery Page Content -->
+    <main class="gallery-main">
+        <section class="gallery-hero">
+            <h1>Photo Gallery</h1>
+            <p>Glimpses of life at Swagatham Foundation</p>
+        </section>
+
+        <section class="full-gallery">
+            <div class="container">
+                <div class="gallery-filter">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="living">Living Spaces</button>
+                    <button class="filter-btn" data-filter="dining">Dining</button>
+                    <button class="filter-btn" data-filter="activities">Activities</button>
+                    <button class="filter-btn" data-filter="medical">Medical Care</button>
+                </div>
+
+                <div class="gallery-container">
+                    <div class="gallery-item living">
+                        <img src="images/dormitory1.jpg" alt="Dormitory">
+                        <div class="gallery-caption">Spacious dormitories</div>
+                    </div>
+                    <div class="gallery-item dining">
+                        <img src="images/dining1.jpg" alt="Dining Area">
+                        <div class="gallery-caption">Community dining</div>
+                    </div>
+                    <div class="gallery-item activities">
+                        <img src="images/yoga.jpg" alt="Yoga Session">
+                        <div class="gallery-caption">Morning yoga</div>
+                    </div>
+                    <div class="gallery-item medical">
+                        <img src="images/checkup.jpg" alt="Medical Checkup">
+                        <div class="gallery-caption">Regular checkups</div>
+                    </div>
+                    <div class="gallery-item activities">
+                        <img src="images/games.jpg" alt="Indoor Games">
+                        <div class="gallery-caption">Indoor games</div>
+                    </div>
+                    <div class="gallery-item living">
+                        <img src="images/garden.jpg" alt="Garden Area">
+                        <div class="gallery-caption">Peaceful garden</div>
+                    </div>
+                    <div class="gallery-item dining">
+                        <img src="images/festival-food.jpg" alt="Festival Food">
+                        <div class="gallery-caption">Festival special meals</div>
+                    </div>
+                    <div class="gallery-item activities">
+                        <img src="images/celebration.jpg" alt="Celebration">
+                        <div class="gallery-caption">Birthday celebrations</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+   <!-- Profile View Modal -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal-container profile-view">
+        <button class="close-modal">&times;</button>
+        <h2>Your Profile</h2>
+        <div class="profile-content" id="profileContent">
+            <!-- Profile data will be loaded here -->
+        </div>
+        <div class="profile-actions" id="profileActions">
+            <!-- Edit button will be shown/hidden based on profileComplete status -->
+        </div>
+    </div>
+</div>
+
+<!-- Profile Edit Modal -->
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-container landscape-form">
+        <button class="close-modal">&times;</button>
+        <h2>Update Profile</h2>
+        <form id="profileForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editName">Full Name</label>
+                    <input type="text" id="editName" name="editName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="editEmail" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editDob">Date of Birth</label>
+                    <input type="date" id="editDob" name="editDob" required>
+                </div>
+                <div class="form-group">
+                    <label for="editGender">Gender</label>
+                    <select id="editGender" name="editGender" required>
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="editAddress">Full Address</label>
+                <textarea id="editAddress" name="editAddress" rows="2" required></textarea>
+            </div>
+            
+            <h3 class="family-heading">Family Member Details (At least one)</h3>
+            <div class="family-members" id="familyMembersContainer">
+                <!-- Family members will be added here -->
+            </div>
+            
+            <button type="button" class="btn-secondary" id="addFamilyMember">+ Add Another Family Member</button>
+            <div class="form-actions">
+                <button type="button" class="btn-tertiary" id="cancelEdit">Cancel</button>
+                <button type="submit" class="btn-primary">Update Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <!-- Footer Section -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Contact Info</h3>
+                    <address>
+                        <p><i class="fas fa-map-marker-alt"></i> City Office: 6, Kamadhenu 3rd St, Mogappair East, Chennai</p>
+                        <p><i class="fas fa-home"></i> Facility: Amudurmedu Village, Chennai</p>
+                        <p><i class="fas fa-phone"></i> +91 96771 34399</p>
+                        <p><i class="fas fa-envelope"></i> swagathamfoundation.oldagehome@gmail.com</p>
+                    </address>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/Swagatham-Foundation-1440815902866146"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="facilities.html">Facilities</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="donate.html">Donate</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Trust Registration</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 Swagatham Foundation. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/sessionManager.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
