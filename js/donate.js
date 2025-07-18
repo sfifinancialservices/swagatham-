@@ -16,6 +16,34 @@ document.addEventListener('DOMContentLoaded', function() {
     const familyMembersContainer = document.getElementById('familyMembersContainer');
     const viewProfileBtn = document.getElementById('viewProfileBtn');
     
+    // Donation and OTP Handling elements
+    const donateButtons = document.querySelectorAll('.donate-now-btn');
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const customAmountInputs = document.querySelectorAll('.custom-amount');
+    const otpModal = document.getElementById('otpModal');
+    const donationModal = document.getElementById('donationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const donationType = document.getElementById('donationType');
+    const amountInput = document.getElementById('amount');
+    const phoneInput = document.getElementById('phone');
+    const rzpButton = document.getElementById('rzp-button');
+    const successModal = document.getElementById('successModal');
+    const successMessage = document.getElementById('successMessage');
+    
+    const otpForm = document.getElementById('otpForm');
+    const phoneNumberInput = document.getElementById('phoneNumber');
+    const otpFieldGroup = document.getElementById('otpFieldGroup');
+    const otpInput = document.getElementById('otp');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
+    const resendOtpBtn = document.getElementById('resendOtpBtn');
+    const otpTimer = document.getElementById('otpTimer');
+    
+    let selectedAmount = 0;
+    let isMonthlyDonation = false;
+    let otpCountdown = 0;
+    let otpTimerInterval;
+
     // Update the UI function
     function updateUI() {
         const isLoggedIn = sessionManager.isLoggedIn();
@@ -25,13 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.add('logged-in');
             document.getElementById('profileBtn').style.display = 'flex';
             document.getElementById('contactBtn').style.display = 'none';
-            
             document.getElementById('profileBtn').classList.add('mobile-visible');
         } else {
             header.classList.remove('logged-in');
             document.getElementById('profileBtn').style.display = 'none';
             document.getElementById('contactBtn').style.display = 'block';
-            
             document.getElementById('profileBtn').classList.remove('mobile-visible');
         }
         
@@ -89,22 +115,58 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
-        if (user.donations && user.donations.length > 0) {
+        if (user.payments && user.payments.length > 0) {
             html += `
                 <div class="donation-history">
                     <h3>Donation History</h3>
-                    ${user.donations.map(donation => `
+                    ${user.payments.map(payment => `
                         <div class="donation-item">
-                            <strong>₹${donation.amount}</strong> - ${donation.type === 'monthly' ? 'Monthly' : 'One-Time'} - 
-                            ${new Date(donation.date).toLocaleDateString()}
-                            ${donation.tax_exemption ? '(Tax Exempt)' : ''}
+                            <strong>₹${payment.amount}</strong> - 
+                            ${new Date(payment.payment_date).toLocaleDateString()}
+                            <div class="payment-id">Payment ID: ${payment.razorpay_payment_id}</div>
+                            <div class="payment-status">Status: ${payment.status || 'completed'}</div>
                         </div>
                     `).join('')}
                 </div>
             `;
         }
         
+        // Add KYC section
+        if (user.kycDocuments) {
+            html += `
+                <div class="kyc-section">
+                    <h3>KYC Documents</h3>
+                    <div class="kyc-details">
+                        ${user.kycDocuments.pan_number ? `<p><strong>PAN:</strong> ${user.kycDocuments.pan_number}</p>` : ''}
+                        ${user.kycDocuments.aadhaar_number ? `<p><strong>Aadhaar:</strong> ${user.kycDocuments.aadhaar_number}</p>` : ''}
+                        ${user.kycDocuments.kyc_doc_path ? `<p><strong>Document Uploaded:</strong> Yes</p>` : '<p><strong>Document Uploaded:</strong> No</p>'}
+                    </div>
+                    <button id="updateKycBtn" class="btn-secondary">Update KYC</button>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="kyc-section">
+                    <h3>KYC Documents</h3>
+                    <p>No KYC documents submitted yet</p>
+                    <button id="submitKycBtn" class="btn-primary">Submit KYC</button>
+                </div>
+            `;
+        }
+
         profileContent.innerHTML = html;
+        
+        // Add KYC button event listeners
+        const submitKycBtn = document.getElementById('submitKycBtn');
+        const updateKycBtn = document.getElementById('updateKycBtn');
+        
+        if (submitKycBtn) {
+            submitKycBtn.addEventListener('click', openKycForm);
+        }
+        
+        if (updateKycBtn) {
+            updateKycBtn.addEventListener('click', openKycForm);
+        }
         
         profileActions.innerHTML = '';
         if (!sessionManager.isProfileComplete()) {
@@ -131,6 +193,74 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionManager.logout();
             profileModal.style.display = 'none';
             updateUI();
+        });
+    }
+    
+    function openKycForm() {
+        // Create and show KYC form modal
+        const kycModal = document.createElement('div');
+        kycModal.className = 'modal-overlay';
+        kycModal.id = 'kycModal';
+        kycModal.innerHTML = `
+            <div class="modal-container">
+                <button class="close-modal">&times;</button>
+                <h2>KYC Document Submission</h2>
+                <form id="kycForm">
+                    <div class="form-group">
+                        <label for="panNumber">PAN Number</label>
+                        <input type="text" id="panNumber" name="panNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aadhaarNumber">Aadhaar Number</label>
+                        <input type="text" id="aadhaarNumber" name="aadhaarNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kycDocument">Upload Document (PDF/Image)</label>
+                        <input type="file" id="kycDocument" name="kycDocument" accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                    <button type="submit" class="btn-primary">Submit KYC</button>
+                </form>
+            </div>
+        `;
+        
+        document.body.appendChild(kycModal);
+        kycModal.style.display = 'flex';
+        
+        // Close modal handler
+        kycModal.querySelector('.close-modal').addEventListener('click', () => {
+            kycModal.style.display = 'none';
+            setTimeout(() => kycModal.remove(), 300);
+        });
+        
+        // Form submission
+        const kycForm = document.getElementById('kycForm');
+        kycForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const panNumber = document.getElementById('panNumber').value;
+            const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+            const kycDocument = document.getElementById('kycDocument').files[0];
+            
+            try {
+                // In a real app, you would upload the document to a server first
+                // For this example, we'll just use the file name
+                const kycDocPath = kycDocument ? kycDocument.name : null;
+                
+                const result = await sessionManager.submitKYC({
+                    pan_number: panNumber,
+                    aadhaar_number: aadhaarNumber,
+                    kyc_doc_path: kycDocPath
+                });
+                
+                if (result.success) {
+                    alert('KYC submitted successfully!');
+                    kycModal.style.display = 'none';
+                    setTimeout(() => kycModal.remove(), 300);
+                    loadProfileData(); // Refresh profile view
+                }
+            } catch (error) {
+                alert('Error submitting KYC: ' + error.message);
+            }
         });
     }
     
@@ -286,34 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     updateUI();
     
-    // Donation and OTP Handling
-    const donateButtons = document.querySelectorAll('.donate-now-btn');
-    const amountButtons = document.querySelectorAll('.amount-btn');
-    const customAmountInputs = document.querySelectorAll('.custom-amount');
-    const otpModal = document.getElementById('otpModal');
-    const donationModal = document.getElementById('donationModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const donationType = document.getElementById('donationType');
-    const amountInput = document.getElementById('amount');
-    const phoneInput = document.getElementById('phone');
-    const rzpButton = document.getElementById('rzp-button');
-    const successModal = document.getElementById('successModal');
-    const successMessage = document.getElementById('successMessage');
-    
-    const otpForm = document.getElementById('otpForm');
-    const phoneNumberInput = document.getElementById('phoneNumber');
-    const otpFieldGroup = document.getElementById('otpFieldGroup');
-    const otpInput = document.getElementById('otp');
-    const sendOtpBtn = document.getElementById('sendOtpBtn');
-    const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-    const resendOtpBtn = document.getElementById('resendOtpBtn');
-    const otpTimer = document.getElementById('otpTimer');
-    
-    let selectedAmount = 0;
-    let isMonthlyDonation = false;
-    let otpCountdown = 0;
-    let otpTimerInterval;
-
+    // Donation amount selection
     amountButtons.forEach(button => {
         button.addEventListener('click', function() {
             amountButtons.forEach(btn => btn.classList.remove('active'));
@@ -331,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Donate button click handler
     donateButtons.forEach(button => {
         button.addEventListener('click', function() {
             if (selectedAmount <= 0) {
@@ -392,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
         donationModal.style.display = 'flex';
     }
     
+    // OTP handling functions
     async function sendOtp(phoneNumber) {
         try {
             const response = await fetch('http://localhost:4000/api/send-otp', {
@@ -542,7 +647,7 @@ document.addEventListener('DOMContentLoaded', function() {
         resendOtpBtn.disabled = true;
     }
     
-    // Load Razorpay script dynamically if not already loaded
+    // Razorpay payment handling
     function loadRazorpayScript() {
         return new Promise((resolve, reject) => {
             if (window.Razorpay) {
@@ -574,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = document.getElementById('amount').value;
         const donationType = document.getElementById('donationType').value;
         const taxExemption = document.getElementById('taxExemption').checked;
-        
+            
         if (!name || !email || !phone || !amount) {
             alert('Please fill all required fields');
             return;
@@ -607,29 +712,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 "image": "images/logo.png",
                 "handler": async function(response) {
                     try {
-                        const donationData = {
+                        const paymentData = {
                             amount: amount,
                             paymentId: response.razorpay_payment_id,
-                            donationType: donationType,
                             taxExemption: taxExemption
                         };
                         
-                        const success = await sessionManager.recordDonation(donationData);
+                        const result = await sessionManager.recordPayment(paymentData);
                         
-                        if (success) {
+                        if (result.success) {
                             successMessage.innerHTML = `
                                 Thank you for your donation of ₹${amount}!<br><br>
-                                <strong>Payment ID:</strong> ${response.razorpay_payment_id}
+                                <strong>Payment ID:</strong> ${response.razorpay_payment_id}<br>
+                                <strong>Status:</strong> Recorded successfully
                             `;
-                            
                             donationModal.style.display = 'none';
                             successModal.style.display = 'flex';
                         } else {
-                            alert('Payment successful but there was an error saving your donation details.');
+                            throw new Error('Payment recording failed');
                         }
                     } catch (error) {
-                        console.error('Error:', error);
-                        alert('Payment successful but there was an error saving your donation details.');
+                        console.error('Payment recording error:', error);
+                        successMessage.innerHTML = `
+                            Payment processed but recording failed.<br><br>
+                            <strong>Payment ID:</strong> ${response.razorpay_payment_id}<br>
+                            <strong>Error:</strong> ${error.message || 'Please contact support'}
+                        `;
+                        donationModal.style.display = 'none';
+                        successModal.style.display = 'flex';
                     } finally {
                         rzpButton.disabled = false;
                         rzpButton.innerHTML = 'Pay with Razorpay';
@@ -640,18 +750,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     "email": email,
                     "contact": phone
                 },
-                "notes": {
-                    "donation_type": donationType,
-                    "tax_exemption": taxExemption ? "Yes" : "No"
-                },
                 "theme": {
                     "color": "#3399cc"
-                },
-                "modal": {
-                    "ondismiss": function() {
-                        rzpButton.disabled = false;
-                        rzpButton.innerHTML = 'Pay with Razorpay';
-                    }
                 }
             };
             
@@ -660,7 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         } catch (error) {
             console.error('Payment initialization failed:', error);
-            alert('Payment system is currently unavailable. Please try again later.');
+            alert('Payment system error: ' + (error.message || 'Please try again later'));
             rzpButton.disabled = false;
             rzpButton.innerHTML = 'Pay with Razorpay';
         }
@@ -669,4 +769,18 @@ document.addEventListener('DOMContentLoaded', function() {
     window.closeSuccessModal = function() {
         successModal.style.display = 'none';
     };
+});
+
+// Close modals when clicking outside
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
+
+// Mobile menu toggle
+document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+    document.querySelector('.main-nav').classList.toggle('active');
 });

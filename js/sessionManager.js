@@ -87,19 +87,55 @@ class SessionManager {
             return false;
         }
     }
-    
-    // Record donation
-    async recordDonation(donationData) {
+
+    // Submit KYC documents
+    async submitKYC(kycData) {
         try {
-            const response = await this.makeAuthenticatedRequest(
-                '/donate',
-                'POST',
-                donationData
-            );
-            return response.success;
+            const response = await fetch(`${this.API_BASE_URL}/kyc`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.getToken()
+                },
+                body: JSON.stringify(kycData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'KYC submission failed');
+            }
+
+            return await response.json();
         } catch (error) {
-            console.error('Error recording donation:', error);
-            return false;
+            console.error('KYC submission error:', error);
+            throw error;
+        }
+    }
+
+    // Record donation
+    async recordPayment(paymentData) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/payment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.getToken()
+                },
+                body: JSON.stringify({
+                    amount: paymentData.amount,
+                    razorpay_payment_id: paymentData.paymentId
+                })
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Payment recording failed');
+            }
+    
+            return await response.json();
+        } catch (error) {
+            console.error('Payment recording error:', error);
+            throw error;
         }
     }
 }

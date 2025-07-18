@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Profile functionality elements
     const profileBtn = document.getElementById('profileBtn');
+    const contactBtn = document.getElementById('contactBtn');
     const profileModal = document.getElementById('profileModal');
     const editProfileModal = document.getElementById('editProfileModal');
     const profileContent = document.getElementById('profileContent');
@@ -21,14 +22,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isLoggedIn) {
             header.classList.add('logged-in');
             if (profileBtn) profileBtn.style.display = 'flex';
-            if (document.getElementById('contactBtn')) document.getElementById('contactBtn').style.display = 'none';
+            if (contactBtn) contactBtn.style.display = 'none';
             
             // For mobile
             if (profileBtn) profileBtn.classList.add('mobile-visible');
         } else {
             header.classList.remove('logged-in');
             if (profileBtn) profileBtn.style.display = 'none';
-            if (document.getElementById('contactBtn')) document.getElementById('contactBtn').style.display = 'block';
+            if (contactBtn) contactBtn.style.display = 'block';
             
             // For mobile
             if (profileBtn) profileBtn.classList.remove('mobile-visible');
@@ -98,8 +99,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         }
+
+        // Add KYC section
+        if (user.kycDocuments) {
+            html += `
+                <div class="kyc-section">
+                    <h3>KYC Documents</h3>
+                    <div class="kyc-details">
+                        ${user.kycDocuments.pan_number ? `<p><strong>PAN:</strong> ${user.kycDocuments.pan_number}</p>` : ''}
+                        ${user.kycDocuments.aadhaar_number ? `<p><strong>Aadhaar:</strong> ${user.kycDocuments.aadhaar_number}</p>` : ''}
+                        ${user.kycDocuments.kyc_doc_path ? `<p><strong>Document Uploaded:</strong> Yes</p>` : '<p><strong>Document Uploaded:</strong> No</p>'}
+                    </div>
+                    <button id="updateKycBtn" class="btn-secondary">Update KYC</button>
+                </div>
+            `;
+        } else {
+            html += `
+                <div class="kyc-section">
+                    <h3>KYC Documents</h3>
+                    <p>No KYC documents submitted yet</p>
+                    <button id="submitKycBtn" class="btn-primary">Submit KYC</button>
+                </div>
+            `;
+        }
         
         if (profileContent) profileContent.innerHTML = html;
+        
+        // Add KYC button event listeners
+        const submitKycBtn = document.getElementById('submitKycBtn');
+        const updateKycBtn = document.getElementById('updateKycBtn');
+        
+        if (submitKycBtn) {
+            submitKycBtn.addEventListener('click', openKycForm);
+        }
+        
+        if (updateKycBtn) {
+            updateKycBtn.addEventListener('click', openKycForm);
+        }
         
         if (profileActions) {
             profileActions.innerHTML = '';
@@ -130,6 +166,76 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateUI();
             });
         }
+    }
+
+    // Function to open KYC form modal
+    function openKycForm() {
+        // Create and show KYC form modal
+        const kycModal = document.createElement('div');
+        kycModal.className = 'modal-overlay';
+        kycModal.id = 'kycModal';
+        kycModal.innerHTML = `
+            <div class="modal-container">
+                <button class="close-modal">&times;</button>
+                <h2>KYC Document Submission</h2>
+                <form id="kycForm">
+                    <div class="form-group">
+                        <label for="panNumber">PAN Number</label>
+                        <input type="text" id="panNumber" name="panNumber" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" title="Please enter a valid PAN number (e.g., AAAAA9999A)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="aadhaarNumber">Aadhaar Number</label>
+                        <input type="text" id="aadhaarNumber" name="aadhaarNumber" pattern="[0-9]{12}" title="Please enter a valid 12-digit Aadhaar number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kycDocument">Upload Document (PDF/Image)</label>
+                        <input type="file" id="kycDocument" name="kycDocument" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <small>Upload a scanned copy of your PAN card or Aadhaar card</small>
+                    </div>
+                    <button type="submit" class="btn-primary">Submit KYC</button>
+                </form>
+            </div>
+        `;
+        
+        document.body.appendChild(kycModal);
+        kycModal.style.display = 'flex';
+        
+        // Close modal handler
+        kycModal.querySelector('.close-modal').addEventListener('click', () => {
+            kycModal.style.display = 'none';
+            setTimeout(() => kycModal.remove(), 300);
+        });
+        
+        // Form submission
+        const kycForm = document.getElementById('kycForm');
+        kycForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const panNumber = document.getElementById('panNumber').value;
+            const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+            const kycDocument = document.getElementById('kycDocument').files[0];
+            
+            try {
+                // In a real app, you would upload the document to a server first
+                // For this example, we'll just use the file name
+                const kycDocPath = kycDocument ? kycDocument.name : null;
+                
+                const result = await sessionManager.submitKYC({
+                    pan_number: panNumber,
+                    aadhaar_number: aadhaarNumber,
+                    kyc_doc_path: kycDocPath
+                });
+                
+                if (result.success) {
+                    alert('KYC submitted successfully!');
+                    kycModal.style.display = 'none';
+                    setTimeout(() => kycModal.remove(), 300);
+                    loadProfileData(); // Refresh profile view
+                }
+            } catch (error) {
+                alert('Error submitting KYC: ' + error.message);
+            }
+        });
     }
     
     // Load profile data into edit form
@@ -326,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
             backgrounds[current].classList.remove('active');
             current = (current + 1) % backgrounds.length;
             backgrounds[current].classList.add('active');
-        }, 4000);
+        }, 6000);
     }
 
     // Initialize hero rotation for all pages
@@ -377,6 +483,67 @@ document.addEventListener('DOMContentLoaded', function() {
             .nav-list {
                 flex-direction: column;
                 gap: 15px !important;
+            }
+        }
+
+        /* KYC Modal Styles */
+        .kyc-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .kyc-section h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .kyc-details p {
+            margin: 0.5rem 0;
+            color: #555;
+        }
+
+        #kycForm .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        #kycForm label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        #kycForm input[type="text"],
+        #kycForm input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #kycForm small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* Fix for overlapping contact and profile buttons */
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .header-actions {
+                gap: 10px;
             }
         }
     `;
@@ -532,5 +699,28 @@ document.addEventListener('DOMContentLoaded', function() {
             link.classList.remove('active');
         }
     });
-});
 
+    // Fix for overlapping buttons - ensure proper spacing
+    function fixButtonOverlap() {
+        const headerActions = document.querySelector('.header-actions');
+        if (!headerActions) return;
+
+        // Ensure only one button is visible at a time
+        const profileBtn = document.getElementById('profileBtn');
+        const contactBtn = document.getElementById('contactBtn');
+
+        if (profileBtn && contactBtn) {
+            if (sessionManager.isLoggedIn()) {
+                profileBtn.style.display = 'flex';
+                contactBtn.style.display = 'none';
+            } else {
+                profileBtn.style.display = 'none';
+                contactBtn.style.display = 'block';
+            }
+        }
+    }
+
+    // Call the fix on initial load and when UI updates
+    fixButtonOverlap();
+    window.addEventListener('resize', fixButtonOverlap);
+});
