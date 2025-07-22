@@ -71,31 +71,42 @@ document.addEventListener('DOMContentLoaded', function() {
         const user = await sessionManager.fetchUserProfile();
         if (!user) return;
         
+        // Store basic user info in localStorage for future logins
+        if (user.name) localStorage.setItem('userName', user.name);
+        if (user.email) localStorage.setItem('userEmail', user.email);
+        if (user.phone) localStorage.setItem('userPhone', user.phone);
+        if (user.dob) localStorage.setItem('userDob', user.dob);
+        if (user.gender) localStorage.setItem('userGender', user.gender);
+        if (user.address) localStorage.setItem('userAddress', user.address);
+        
         let html = `
             <div class="profile-details">
                 <div class="profile-detail">
                     <label>Name</label>
-                    <span>${user.name || 'Not provided'}</span>
+                    <span>${user.name || localStorage.getItem('userName') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Email</label>
-                    <span>${user.email || 'Not provided'}</span>
+                    <span>${user.email || localStorage.getItem('userEmail') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Phone</label>
-                    <span>${user.phone || 'Not provided'}</span>
+                    <span>${user.phone || localStorage.getItem('userPhone') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Date of Birth</label>
-                    <span>${user.dob || 'Not provided'}</span>
+                    <span>${user.dob || localStorage.getItem('userDob') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Gender</label>
-                    <span>${user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not provided'}</span>
+                    <span>${user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 
+                        (localStorage.getItem('userGender') ? 
+                         localStorage.getItem('userGender').charAt(0).toUpperCase() + localStorage.getItem('userGender').slice(1) : 
+                         'Not provided')}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Address</label>
-                    <span>${user.address || 'Not provided'}</span>
+                    <span>${user.address || localStorage.getItem('userAddress') || 'Not provided'}</span>
                 </div>
             </div>
         `;
@@ -139,9 +150,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="kyc-details">
                         ${user.kycDocuments.pan_number ? `<p><strong>PAN:</strong> ${user.kycDocuments.pan_number}</p>` : ''}
                         ${user.kycDocuments.aadhaar_number ? `<p><strong>Aadhaar:</strong> ${user.kycDocuments.aadhaar_number}</p>` : ''}
+                        ${user.kycDocuments.dob ? `<p><strong>Date of Birth:</strong> ${user.kycDocuments.dob}</p>` : ''}
                         ${user.kycDocuments.kyc_doc_path ? `<p><strong>Document Uploaded:</strong> Yes</p>` : '<p><strong>Document Uploaded:</strong> No</p>'}
                     </div>
-                    <button id="updateKycBtn" class="btn-secondary">Update KYC</button>
                 </div>
             `;
         } else {
@@ -156,16 +167,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         profileContent.innerHTML = html;
         
-        // Add KYC button event listeners
+        // Add KYC button event listener if needed
         const submitKycBtn = document.getElementById('submitKycBtn');
-        const updateKycBtn = document.getElementById('updateKycBtn');
-        
         if (submitKycBtn) {
             submitKycBtn.addEventListener('click', openKycForm);
-        }
-        
-        if (updateKycBtn) {
-            updateKycBtn.addEventListener('click', openKycForm);
         }
         
         profileActions.innerHTML = '';
@@ -215,6 +220,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input type="text" id="aadhaarNumber" name="aadhaarNumber" required>
                     </div>
                     <div class="form-group">
+                        <label for="kycDob">Date of Birth</label>
+                        <input type="date" id="kycDob" name="kycDob" required>
+                    </div>
+                    <div class="form-group">
                         <label for="kycDocument">Upload Document (PDF/Image)</label>
                         <input type="file" id="kycDocument" name="kycDocument" accept=".pdf,.jpg,.jpeg,.png">
                     </div>
@@ -239,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const panNumber = document.getElementById('panNumber').value;
             const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+            const kycDob = document.getElementById('kycDob').value;
             const kycDocument = document.getElementById('kycDocument').files[0];
             
             try {
@@ -249,6 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await sessionManager.submitKYC({
                     pan_number: panNumber,
                     aadhaar_number: aadhaarNumber,
+                    dob: kycDob,
                     kyc_doc_path: kycDocPath
                 });
                 
@@ -268,11 +279,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadEditProfileForm(user) {
         if (!user) return;
         
-        document.getElementById('editName').value = user.name || '';
-        document.getElementById('editEmail').value = user.email || '';
-        document.getElementById('editDob').value = user.dob || '';
-        document.getElementById('editGender').value = user.gender || '';
-        document.getElementById('editAddress').value = user.address || '';
+        document.getElementById('editName').value = user.name || localStorage.getItem('userName') || '';
+        document.getElementById('editEmail').value = user.email || localStorage.getItem('userEmail') || '';
+        document.getElementById('editDob').value = user.dob || localStorage.getItem('userDob') || '';
+        document.getElementById('editGender').value = user.gender || localStorage.getItem('userGender') || '';
+        document.getElementById('editAddress').value = user.address || localStorage.getItem('userAddress') || '';
         
         familyMembersContainer.innerHTML = '';
         
@@ -386,6 +397,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (success) {
             localStorage.setItem('profileComplete', 'true');
+            // Store basic info in localStorage
+            localStorage.setItem('userName', profileData.name);
+            localStorage.setItem('userEmail', profileData.email);
+            localStorage.setItem('userDob', profileData.dob);
+            localStorage.setItem('userGender', profileData.gender);
+            localStorage.setItem('userAddress', profileData.address);
+            
             editProfileModal.style.display = 'none';
             loadProfileData();
             profileModal.style.display = 'flex';
@@ -479,11 +497,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Pre-fill user details if available
         if (user) {
-            document.getElementById('fullName').value = user.name || '';
-            document.getElementById('email').value = user.email || '';
+            document.getElementById('fullName').value = user.name || localStorage.getItem('userName') || '';
+            document.getElementById('email').value = user.email || localStorage.getItem('userEmail') || '';
             phoneInput.value = user.phone || verifiedPhone || '';
         } else if (verifiedPhone) {
             phoneInput.value = verifiedPhone;
+        } else if (localStorage.getItem('userPhone')) {
+            phoneInput.value = localStorage.getItem('userPhone');
         }
         
         // Allow amount editing
@@ -575,6 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (result.success) {
                 sessionManager.login(result.token, result.profileComplete);
+                // Store phone number in localStorage
+                localStorage.setItem('userPhone', phoneNumber);
                 updateUI();
                 
                 // After successful verification, fetch user profile to pre-fill details
@@ -779,7 +801,41 @@ document.querySelectorAll('.modal-overlay').forEach(modal => {
         }
     });
 });
+// In your payment route handler (e.g., paymentController.js)
+const { sendDonationReceipt } = require('./emailService');
 
+async function recordPayment(req, res) {
+  try {
+    const { amount, paymentId, taxExemption, email, name, donationType } = req.body;
+    
+    // Save to database
+    const payment = await Payment.create({
+      amount,
+      razorpay_payment_id: paymentId,
+      tax_exemption: taxExemption,
+      email,
+      name,
+      type: donationType,
+      status: 'completed'
+    });
+
+    // Send receipt email
+    const donationDetails = {
+      amount,
+      paymentId,
+      donationType,
+      name,
+      date: new Date()
+    };
+    
+    await sendDonationReceipt(email, donationDetails);
+
+    res.json({ success: true, payment });
+  } catch (error) {
+    console.error('Payment recording error:', error);
+    res.status(500).json({ success: false, error: 'Payment recording failed' });
+  }
+}
 // Mobile menu toggle
 document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
     document.querySelector('.main-nav').classList.toggle('active');

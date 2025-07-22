@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Profile functionality elements
     const profileBtn = document.getElementById('profileBtn');
-    const contactBtn = document.getElementById('contactBtn');
+    const contactBtn = document.querySelector('.contact-button');
     const profileModal = document.getElementById('profileModal');
     const editProfileModal = document.getElementById('editProfileModal');
     const profileContent = document.getElementById('profileContent');
@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const profileForm = document.getElementById('profileForm');
     const addFamilyMemberBtn = document.getElementById('addFamilyMember');
     const familyMembersContainer = document.getElementById('familyMembersContainer');
+    const viewProfileBtn = document.getElementById('viewProfileBtn');
     
     // Update UI based on login status
     function updateUI() {
@@ -21,18 +22,56 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isLoggedIn) {
             header.classList.add('logged-in');
-            if (profileBtn) profileBtn.style.display = 'flex';
-            if (contactBtn) contactBtn.style.display = 'none';
+            if (profileBtn) {
+                profileBtn.style.display = 'flex';
+                profileBtn.style.visibility = 'visible';
+            }
+            if (contactBtn) {
+                contactBtn.style.display = 'none';
+                contactBtn.style.visibility = 'hidden';
+            }
             
             // For mobile
             if (profileBtn) profileBtn.classList.add('mobile-visible');
         } else {
             header.classList.remove('logged-in');
-            if (profileBtn) profileBtn.style.display = 'none';
-            if (contactBtn) contactBtn.style.display = 'block';
+            if (profileBtn) {
+                profileBtn.style.display = 'none';
+                profileBtn.style.visibility = 'hidden';
+            }
+            if (contactBtn) {
+                contactBtn.style.display = 'block';
+                contactBtn.style.visibility = 'visible';
+            }
             
             // For mobile
             if (profileBtn) profileBtn.classList.remove('mobile-visible');
+        }
+        
+        // Force reflow to prevent rendering issues
+        if (header) void header.offsetWidth;
+    }
+
+    // Fix header buttons positioning
+    function fixHeaderButtons() {
+        const headerActions = document.querySelector('.header-actions');
+        if (!headerActions) return;
+
+        if (profileBtn && contactBtn) {
+            // Ensure only one button is visible at a time
+            if (sessionManager.isLoggedIn()) {
+                profileBtn.style.display = 'flex';
+                contactBtn.style.display = 'none';
+            } else {
+                profileBtn.style.display = 'none';
+                contactBtn.style.display = 'block';
+            }
+            
+            // Add small delay to ensure proper rendering
+            setTimeout(() => {
+                profileBtn.style.visibility = profileBtn.style.display === 'flex' ? 'visible' : 'hidden';
+                contactBtn.style.visibility = contactBtn.style.display === 'block' ? 'visible' : 'hidden';
+            }, 50);
         }
     }
     
@@ -41,31 +80,42 @@ document.addEventListener('DOMContentLoaded', function() {
         const user = await sessionManager.fetchUserProfile();
         if (!user) return;
         
+        // Store basic user info in localStorage for future logins
+        if (user.name) localStorage.setItem('userName', user.name);
+        if (user.email) localStorage.setItem('userEmail', user.email);
+        if (user.phone) localStorage.setItem('userPhone', user.phone);
+        if (user.dob) localStorage.setItem('userDob', user.dob);
+        if (user.gender) localStorage.setItem('userGender', user.gender);
+        if (user.address) localStorage.setItem('userAddress', user.address);
+        
         let html = `
             <div class="profile-details">
                 <div class="profile-detail">
                     <label>Name</label>
-                    <span>${user.name || 'Not provided'}</span>
+                    <span>${user.name || localStorage.getItem('userName') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Email</label>
-                    <span>${user.email || 'Not provided'}</span>
+                    <span>${user.email || localStorage.getItem('userEmail') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Phone</label>
-                    <span>${user.phone || 'Not provided'}</span>
+                    <span>${user.phone || localStorage.getItem('userPhone') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Date of Birth</label>
-                    <span>${user.dob || 'Not provided'}</span>
+                    <span>${user.dob || localStorage.getItem('userDob') || 'Not provided'}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Gender</label>
-                    <span>${user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not provided'}</span>
+                    <span>${user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 
+                        (localStorage.getItem('userGender') ? 
+                         localStorage.getItem('userGender').charAt(0).toUpperCase() + localStorage.getItem('userGender').slice(1) : 
+                         'Not provided')}</span>
                 </div>
                 <div class="profile-detail">
                     <label>Address</label>
-                    <span>${user.address || 'Not provided'}</span>
+                    <span>${user.address || localStorage.getItem('userAddress') || 'Not provided'}</span>
                 </div>
             </div>
         `;
@@ -85,21 +135,22 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
         
-        if (user.donations && user.donations.length > 0) {
+        if (user.payments && user.payments.length > 0) {
             html += `
                 <div class="donation-history">
                     <h3>Donation History</h3>
-                    ${user.donations.map(donation => `
+                    ${user.payments.map(payment => `
                         <div class="donation-item">
-                            <strong>₹${donation.amount}</strong> - ${donation.type === 'monthly' ? 'Monthly' : 'One-Time'} - 
-                            ${new Date(donation.date).toLocaleDateString()}
-                            ${donation.taxExemption ? '(Tax Exempt)' : ''}
+                            <strong>₹${payment.amount}</strong> - 
+                            ${new Date(payment.payment_date).toLocaleDateString()}
+                            <div class="payment-id">Payment ID: ${payment.razorpay_payment_id}</div>
+                            <div class="payment-status">Status: ${payment.status || 'completed'}</div>
                         </div>
                     `).join('')}
                 </div>
             `;
         }
-
+        
         // Add KYC section
         if (user.kycDocuments) {
             html += `
@@ -108,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="kyc-details">
                         ${user.kycDocuments.pan_number ? `<p><strong>PAN:</strong> ${user.kycDocuments.pan_number}</p>` : ''}
                         ${user.kycDocuments.aadhaar_number ? `<p><strong>Aadhaar:</strong> ${user.kycDocuments.aadhaar_number}</p>` : ''}
+                        ${user.kycDocuments.dob ? `<p><strong>Date of Birth:</strong> ${user.kycDocuments.dob}</p>` : ''}
                         ${user.kycDocuments.kyc_doc_path ? `<p><strong>Document Uploaded:</strong> Yes</p>` : '<p><strong>Document Uploaded:</strong> No</p>'}
                     </div>
-                    <button id="updateKycBtn" class="btn-secondary">Update KYC</button>
                 </div>
             `;
         } else {
@@ -122,53 +173,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         }
+
+        profileContent.innerHTML = html;
         
-        if (profileContent) profileContent.innerHTML = html;
-        
-        // Add KYC button event listeners
+        // Add KYC button event listener if needed
         const submitKycBtn = document.getElementById('submitKycBtn');
-        const updateKycBtn = document.getElementById('updateKycBtn');
-        
         if (submitKycBtn) {
             submitKycBtn.addEventListener('click', openKycForm);
         }
         
-        if (updateKycBtn) {
-            updateKycBtn.addEventListener('click', openKycForm);
-        }
-        
-        if (profileActions) {
-            profileActions.innerHTML = '';
+        profileActions.innerHTML = '';
+        if (!sessionManager.isProfileComplete()) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-secondary';
+            editBtn.id = 'editProfileBtn';
+            editBtn.innerHTML = 'Edit Profile';
+            profileActions.appendChild(editBtn);
             
-            if (!sessionManager.isProfileComplete()) {
-                const editBtn = document.createElement('button');
-                editBtn.className = 'btn-secondary';
-                editBtn.id = 'editProfileBtn';
-                editBtn.innerHTML = 'Edit Profile';
-                profileActions.appendChild(editBtn);
-                
-                editBtn.addEventListener('click', function() {
-                    loadEditProfileForm(user);
-                    if (profileModal) profileModal.style.display = 'none';
-                    if (editProfileModal) editProfileModal.style.display = 'flex';
-                });
-            }
-            
-            const logoutBtn = document.createElement('button');
-            logoutBtn.className = 'btn-primary';
-            logoutBtn.id = 'logoutBtn';
-            logoutBtn.innerHTML = 'Logout';
-            profileActions.appendChild(logoutBtn);
-            
-            logoutBtn.addEventListener('click', function() {
-                sessionManager.logout();
-                if (profileModal) profileModal.style.display = 'none';
-                updateUI();
+            editBtn.addEventListener('click', function() {
+                loadEditProfileForm(user);
+                profileModal.style.display = 'none';
+                editProfileModal.style.display = 'flex';
             });
         }
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'btn-primary';
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.innerHTML = 'Logout';
+        profileActions.appendChild(logoutBtn);
+        
+        logoutBtn.addEventListener('click', function() {
+            sessionManager.logout();
+            profileModal.style.display = 'none';
+            updateUI();
+        });
     }
-
-    // Function to open KYC form modal
+    
     function openKycForm() {
         // Create and show KYC form modal
         const kycModal = document.createElement('div');
@@ -181,16 +222,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <form id="kycForm">
                     <div class="form-group">
                         <label for="panNumber">PAN Number</label>
-                        <input type="text" id="panNumber" name="panNumber" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" title="Please enter a valid PAN number (e.g., AAAAA9999A)" required>
+                        <input type="text" id="panNumber" name="panNumber" required>
                     </div>
                     <div class="form-group">
                         <label for="aadhaarNumber">Aadhaar Number</label>
-                        <input type="text" id="aadhaarNumber" name="aadhaarNumber" pattern="[0-9]{12}" title="Please enter a valid 12-digit Aadhaar number" required>
+                        <input type="text" id="aadhaarNumber" name="aadhaarNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kycDob">Date of Birth</label>
+                        <input type="date" id="kycDob" name="kycDob" required>
                     </div>
                     <div class="form-group">
                         <label for="kycDocument">Upload Document (PDF/Image)</label>
-                        <input type="file" id="kycDocument" name="kycDocument" accept=".pdf,.jpg,.jpeg,.png" required>
-                        <small>Upload a scanned copy of your PAN card or Aadhaar card</small>
+                        <input type="file" id="kycDocument" name="kycDocument" accept=".pdf,.jpg,.jpeg,.png">
                     </div>
                     <button type="submit" class="btn-primary">Submit KYC</button>
                 </form>
@@ -213,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const panNumber = document.getElementById('panNumber').value;
             const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+            const kycDob = document.getElementById('kycDob').value;
             const kycDocument = document.getElementById('kycDocument').files[0];
             
             try {
@@ -223,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const result = await sessionManager.submitKYC({
                     pan_number: panNumber,
                     aadhaar_number: aadhaarNumber,
+                    dob: kycDob,
                     kyc_doc_path: kycDocPath
                 });
                 
@@ -242,13 +288,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadEditProfileForm(user) {
         if (!user) return;
         
-        document.getElementById('editName').value = user.name || '';
-        document.getElementById('editEmail').value = user.email || '';
-        document.getElementById('editDob').value = user.dob || '';
-        document.getElementById('editGender').value = user.gender || '';
-        document.getElementById('editAddress').value = user.address || '';
+        document.getElementById('editName').value = user.name || localStorage.getItem('userName') || '';
+        document.getElementById('editEmail').value = user.email || localStorage.getItem('userEmail') || '';
+        document.getElementById('editDob').value = user.dob || localStorage.getItem('userDob') || '';
+        document.getElementById('editGender').value = user.gender || localStorage.getItem('userGender') || '';
+        document.getElementById('editAddress').value = user.address || localStorage.getItem('userAddress') || '';
         
-        if (familyMembersContainer) familyMembersContainer.innerHTML = '';
+        familyMembersContainer.innerHTML = '';
         
         if (user.familyMembers && user.familyMembers.length > 0) {
             user.familyMembers.forEach((member, index) => {
@@ -261,8 +307,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add family member to edit form
     function addFamilyMember(name = '', gender = '', relation = '', dob = '', isFirst = false) {
-        if (!familyMembersContainer) return;
-        
         const memberId = Date.now();
         const memberHtml = `
             <div class="family-member-form" data-id="${memberId}">
@@ -300,119 +344,107 @@ document.addEventListener('DOMContentLoaded', function() {
         familyMembersContainer.insertAdjacentHTML('beforeend', memberHtml);
         
         if (!isFirst) {
-            const removeBtn = document.querySelector(`.remove-family-member[data-id="${memberId}"]`);
-            if (removeBtn) {
-                removeBtn.addEventListener('click', function() {
-                    this.closest('.family-member-form').remove();
-                });
-            }
+            document.querySelector(`.remove-family-member[data-id="${memberId}"]`).addEventListener('click', function() {
+                this.closest('.family-member-form').remove();
+            });
         }
     }
     
     // Event listeners for profile management
-    if (profileBtn) {
-        profileBtn.addEventListener('click', function() {
+    profileBtn.addEventListener('click', function() {
+        loadProfileData();
+        profileModal.style.display = 'flex';
+    });
+    
+    cancelEditBtn.addEventListener('click', function() {
+        editProfileModal.style.display = 'none';
+        profileModal.style.display = 'flex';
+    });
+    
+    addFamilyMemberBtn.addEventListener('click', function() {
+        addFamilyMember();
+    });
+    
+    profileForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const profileData = {
+            name: document.getElementById('editName').value,
+            email: document.getElementById('editEmail').value,
+            dob: document.getElementById('editDob').value,
+            gender: document.getElementById('editGender').value,
+            address: document.getElementById('editAddress').value,
+            familyMembers: []
+        };
+        
+        // Collect family member data
+        const memberNames = document.querySelectorAll('input[name="memberName[]"]');
+        const memberGenders = document.querySelectorAll('select[name="memberGender[]"]');
+        const memberRelations = document.querySelectorAll('input[name="memberRelation[]"]');
+        const memberDobs = document.querySelectorAll('input[name="memberDob[]"]');
+        
+        for (let i = 0; i < memberNames.length; i++) {
+            if (memberNames[i].value && memberGenders[i].value && memberRelations[i].value) {
+                profileData.familyMembers.push({
+                    name: memberNames[i].value,
+                    gender: memberGenders[i].value,
+                    relation: memberRelations[i].value,
+                    dob: memberDobs[i].value
+                });
+            }
+        }
+        
+        // Validate at least one family member
+        if (profileData.familyMembers.length === 0) {
+            alert('Please add at least one family member');
+            return;
+        }
+        
+        // Update profile via API
+        const success = await sessionManager.updateUserProfile(profileData);
+        
+        if (success) {
+            localStorage.setItem('profileComplete', 'true');
+            // Store basic info in localStorage
+            localStorage.setItem('userName', profileData.name);
+            localStorage.setItem('userEmail', profileData.email);
+            localStorage.setItem('userDob', profileData.dob);
+            localStorage.setItem('userGender', profileData.gender);
+            localStorage.setItem('userAddress', profileData.address);
+            
+            editProfileModal.style.display = 'none';
             loadProfileData();
-            if (profileModal) profileModal.style.display = 'flex';
+            profileModal.style.display = 'flex';
+        } else {
+            alert('Failed to update profile. Please try again.');
+        }
+    });
+    
+    if (viewProfileBtn) {
+        viewProfileBtn.addEventListener('click', function() {
+            document.getElementById('successModal').style.display = 'none';
+            loadProfileData();
+            profileModal.style.display = 'flex';
         });
     }
     
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', function() {
-            if (editProfileModal) editProfileModal.style.display = 'none';
-            if (profileModal) profileModal.style.display = 'flex';
-        });
-    }
-    
-    if (addFamilyMemberBtn) {
-        addFamilyMemberBtn.addEventListener('click', function() {
-            addFamilyMember();
-        });
-    }
-    
-    if (profileForm) {
-        profileForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // Collect form data
-            const profileData = {
-                name: document.getElementById('editName').value,
-                email: document.getElementById('editEmail').value,
-                dob: document.getElementById('editDob').value,
-                gender: document.getElementById('editGender').value,
-                address: document.getElementById('editAddress').value,
-                familyMembers: []
-            };
-            
-            // Collect family member data
-            const memberNames = document.querySelectorAll('input[name="memberName[]"]');
-            const memberGenders = document.querySelectorAll('select[name="memberGender[]"]');
-            const memberRelations = document.querySelectorAll('input[name="memberRelation[]"]');
-            const memberDobs = document.querySelectorAll('input[name="memberDob[]"]');
-            
-            for (let i = 0; i < memberNames.length; i++) {
-                if (memberNames[i].value && memberGenders[i].value && memberRelations[i].value) {
-                    profileData.familyMembers.push({
-                        name: memberNames[i].value,
-                        gender: memberGenders[i].value,
-                        relation: memberRelations[i].value,
-                        dob: memberDobs[i].value
-                    });
-                }
-            }
-            
-            // Validate at least one family member
-            if (profileData.familyMembers.length === 0) {
-                alert('Please add at least one family member');
-                return;
-            }
-            
-            // Update profile via API
-            const success = await sessionManager.updateUserProfile(profileData);
-            
-            if (success) {
-                localStorage.setItem('profileComplete', 'true');
-                if (editProfileModal) editProfileModal.style.display = 'none';
-                loadProfileData();
-                if (profileModal) profileModal.style.display = 'flex';
-            } else {
-                alert('Failed to update profile. Please try again.');
-            }
-        });
-    }
-    
-    // Close modals
     document.querySelectorAll('.close-modal').forEach(closeBtn => {
         closeBtn.addEventListener('click', function() {
             this.closest('.modal-overlay').style.display = 'none';
         });
     });
     
-    // Prevent modal from closing when clicking inside
     document.querySelectorAll('.modal-container').forEach(modal => {
         modal.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     });
     
-    // Initialize UI
-    updateUI();
-
-    // Mobile Menu Toggle
-    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-    const mainNav = document.querySelector('.main-nav');
-    
-    if (mobileMenuToggle && mainNav) {
-        mobileMenuToggle.addEventListener('click', function() {
-            mainNav.style.display = mainNav.style.display === 'block' ? 'none' : 'block';
-            
-            if (mainNav.style.display === 'block') {
-                mainNav.style.animation = 'slideDown 0.5s ease forwards';
-            } else {
-                mainNav.style.animation = 'slideUp 0.3s ease forwards';
-            }
-        });
-    }
+    // Mobile menu toggle
+    document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+        document.querySelector('.main-nav').classList.toggle('active');
+    });
 
     // Hero image rotation for all pages
     function initHeroRotation(heroClass, bgClass) {
@@ -443,112 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initHeroRotation('donate-hero', 'donate-hero-bg');
     initHeroRotation('contact-hero', 'contact-hero-bg');
 
-    // Add animation styles
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .main-nav {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background-color: white;
-                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-                padding: 20px;
-                display: none;
-            }
-            
-            .nav-list {
-                flex-direction: column;
-                gap: 15px !important;
-            }
-        }
-
-        /* KYC Modal Styles */
-        .kyc-section {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: #f9f9f9;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .kyc-section h3 {
-            margin-top: 0;
-            color: #333;
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-
-        .kyc-details p {
-            margin: 0.5rem 0;
-            color: #555;
-        }
-
-        #kycForm .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        #kycForm label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #333;
-        }
-
-        #kycForm input[type="text"],
-        #kycForm input[type="file"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        #kycForm small {
-            display: block;
-            margin-top: 0.25rem;
-            color: #666;
-            font-size: 0.85rem;
-        }
-
-        /* Fix for overlapping contact and profile buttons */
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            .header-actions {
-                gap: 10px;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -700,27 +626,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Fix for overlapping buttons - ensure proper spacing
-    function fixButtonOverlap() {
-        const headerActions = document.querySelector('.header-actions');
-        if (!headerActions) return;
-
-        // Ensure only one button is visible at a time
-        const profileBtn = document.getElementById('profileBtn');
-        const contactBtn = document.getElementById('contactBtn');
-
-        if (profileBtn && contactBtn) {
-            if (sessionManager.isLoggedIn()) {
-                profileBtn.style.display = 'flex';
-                contactBtn.style.display = 'none';
-            } else {
-                profileBtn.style.display = 'none';
-                contactBtn.style.display = 'block';
-            }
-        }
-    }
-
-    // Call the fix on initial load and when UI updates
-    fixButtonOverlap();
-    window.addEventListener('resize', fixButtonOverlap);
+    // Initialize UI
+    updateUI();
 });
+

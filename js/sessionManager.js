@@ -112,7 +112,7 @@ class SessionManager {
         }
     }
 
-    // Record donation
+    // Record payment (for donation history)
     async recordPayment(paymentData) {
         try {
             const response = await fetch(`${this.API_BASE_URL}/payment`, {

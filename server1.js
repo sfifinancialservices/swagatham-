@@ -53,24 +53,29 @@ function authenticateToken(req, res, next) {
 
 // Send OTP endpoint
 app.post('/api/send-otp', async (req, res) => {
-  const { phoneNumber } = req.body;
-  if (!phoneNumber || phoneNumber.length !== 10 || isNaN(phoneNumber)) {
-    return res.status(400).json({ success: false, error: 'Invalid phone number' });
-  }
-  const otp = generateOTP();
-  otpStore.set(phoneNumber, {
-    otp,
-    expiresAt: Date.now() + 5 * 60 * 1000,
-  });
   try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber || phoneNumber.length !== 10 || isNaN(phoneNumber)) {
+      return res.status(400).json({ success: false, error: 'Invalid phone number' });
+    }
+    
+    const otp = generateOTP();
+    otpStore.set(phoneNumber, { otp, expiresAt: Date.now() + 5 * 60 * 1000 });
+    
     await twilioClient.messages.create({
       body: `Your OTP for Swagatham Foundation is: ${otp}`,
       from: process.env.TWILIO_PHONE_NUMBER,
       to: `+91${phoneNumber}`,
     });
+    
     res.json({ success: true, message: 'OTP sent successfully' });
   } catch (err) {
-    res.status(500).json({ success: false, error: 'Failed to send OTP' });
+    console.error('OTP sending failed:', err);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to send OTP',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
@@ -253,12 +258,12 @@ app.post('/api/payment', authenticateToken, async (req, res) => {
 // KYC submission endpoint
 app.post('/api/kyc', authenticateToken, async (req, res) => {
   const phone = req.user;
-  const { pan_number, aadhaar_number, kyc_doc_path } = req.body;
+  const { pan_number, aadhaar_number, dob, kyc_doc_path } = req.body; // Added dob here
 
-  if (!pan_number || !aadhaar_number) {
+  if (!pan_number || !aadhaar_number || !dob) { // Added dob validation
       return res.status(400).json({ 
           success: false, 
-          error: 'PAN and Aadhaar numbers are required' 
+          error: 'PAN, Aadhaar numbers and Date of Birth are required' 
       });
   }
 
@@ -273,16 +278,17 @@ app.post('/api/kyc', authenticateToken, async (req, res) => {
           });
       }
 
-      // Upsert KYC documents
+      // Upsert KYC documents with dob
       await conn.execute(
           `INSERT INTO kyc_documents 
-           (user_id, pan_number, aadhaar_number, kyc_doc_path) 
-           VALUES (?, ?, ?, ?)
+           (user_id, pan_number, aadhaar_number, date_of_birth, kyc_doc_path) 
+           VALUES (?, ?, ?, ?, ?)
            ON DUPLICATE KEY UPDATE
            pan_number = VALUES(pan_number),
            aadhaar_number = VALUES(aadhaar_number),
+           date_of_birth = VALUES(date_of_birth),
            kyc_doc_path = VALUES(kyc_doc_path)`,
-          [user[0].id, pan_number, aadhaar_number, kyc_doc_path || null]
+          [user[0].id, pan_number, aadhaar_number, dob, kyc_doc_path || null]
       );
 
       res.json({ 
@@ -299,6 +305,7 @@ app.post('/api/kyc', authenticateToken, async (req, res) => {
       conn.release();
   }
 });
+
 // Admin login endpoint
 app.post('/api/admin/login', async (req, res) => {
   const { username, password } = req.body;
