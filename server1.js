@@ -592,12 +592,13 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
 });
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    error: 'Endpoint not found' 
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: 'Endpoint not found'
   });
 });
+
 
 // Global error handler
 app.use((err, req, res, next) => {
