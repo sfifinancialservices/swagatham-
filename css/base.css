@@ -104,3 +104,38 @@ body {
         --section-padding: 50px 0;
     }
 }
+
+
+/* KYC Section Styles */
+.kyc-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.kyc-section h3 {
+    color: var(--dark-blue);
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.kyc-details p {
+    margin-bottom: 10px;
+}
+
+.kyc-details strong {
+    color: var(--dark-blue);
+    display: inline-block;
+    width: 150px;
+}
+
+/* File Input Styling */
+.form-group input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}

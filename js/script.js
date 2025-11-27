@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const header = document.querySelector('.main-header');
         
         if (isLoggedIn) {
-            header.classList.add('logged-in');
+            if (header) header.classList.add('logged-in');
             if (profileBtn) {
                 profileBtn.style.display = 'flex';
                 profileBtn.style.visibility = 'visible';
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // For mobile
             if (profileBtn) profileBtn.classList.add('mobile-visible');
         } else {
-            header.classList.remove('logged-in');
+            if (header) header.classList.remove('logged-in');
             if (profileBtn) {
                 profileBtn.style.display = 'none';
                 profileBtn.style.visibility = 'hidden';
@@ -174,40 +174,44 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }
 
-        profileContent.innerHTML = html;
-        
-        // Add KYC button event listener if needed
-        const submitKycBtn = document.getElementById('submitKycBtn');
-        if (submitKycBtn) {
-            submitKycBtn.addEventListener('click', openKycForm);
+        if (profileContent) {
+            profileContent.innerHTML = html;
+            
+            // Add KYC button event listener if needed
+            const submitKycBtn = document.getElementById('submitKycBtn');
+            if (submitKycBtn) {
+                submitKycBtn.addEventListener('click', openKycForm);
+            }
         }
         
-        profileActions.innerHTML = '';
-        if (!sessionManager.isProfileComplete()) {
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn-secondary';
-            editBtn.id = 'editProfileBtn';
-            editBtn.innerHTML = 'Edit Profile';
-            profileActions.appendChild(editBtn);
+        if (profileActions) {
+            profileActions.innerHTML = '';
+            if (!sessionManager.isProfileComplete()) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn-secondary';
+                editBtn.id = 'editProfileBtn';
+                editBtn.innerHTML = 'Edit Profile';
+                profileActions.appendChild(editBtn);
+                
+                editBtn.addEventListener('click', function() {
+                    loadEditProfileForm(user);
+                    if (profileModal) profileModal.style.display = 'none';
+                    if (editProfileModal) editProfileModal.style.display = 'flex';
+                });
+            }
             
-            editBtn.addEventListener('click', function() {
-                loadEditProfileForm(user);
-                profileModal.style.display = 'none';
-                editProfileModal.style.display = 'flex';
+            const logoutBtn = document.createElement('button');
+            logoutBtn.className = 'btn-primary';
+            logoutBtn.id = 'logoutBtn';
+            logoutBtn.innerHTML = 'Logout';
+            profileActions.appendChild(logoutBtn);
+            
+            logoutBtn.addEventListener('click', function() {
+                sessionManager.logout();
+                if (profileModal) profileModal.style.display = 'none';
+                updateUI();
             });
         }
-        
-        const logoutBtn = document.createElement('button');
-        logoutBtn.className = 'btn-primary';
-        logoutBtn.id = 'logoutBtn';
-        logoutBtn.innerHTML = 'Logout';
-        profileActions.appendChild(logoutBtn);
-        
-        logoutBtn.addEventListener('click', function() {
-            sessionManager.logout();
-            profileModal.style.display = 'none';
-            updateUI();
-        });
     }
     
     function openKycForm() {
@@ -252,61 +256,73 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Form submission
         const kycForm = document.getElementById('kycForm');
-        kycForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const panNumber = document.getElementById('panNumber').value;
-            const aadhaarNumber = document.getElementById('aadhaarNumber').value;
-            const kycDob = document.getElementById('kycDob').value;
-            const kycDocument = document.getElementById('kycDocument').files[0];
-            
-            try {
-                // In a real app, you would upload the document to a server first
-                // For this example, we'll just use the file name
-                const kycDocPath = kycDocument ? kycDocument.name : null;
+        if (kycForm) {
+            kycForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 
-                const result = await sessionManager.submitKYC({
-                    pan_number: panNumber,
-                    aadhaar_number: aadhaarNumber,
-                    dob: kycDob,
-                    kyc_doc_path: kycDocPath
-                });
+                const panNumber = document.getElementById('panNumber').value;
+                const aadhaarNumber = document.getElementById('aadhaarNumber').value;
+                const kycDob = document.getElementById('kycDob').value;
+                const kycDocument = document.getElementById('kycDocument').files[0];
                 
-                if (result.success) {
-                    alert('KYC submitted successfully!');
-                    kycModal.style.display = 'none';
-                    setTimeout(() => kycModal.remove(), 300);
-                    loadProfileData(); // Refresh profile view
+                try {
+                    // In a real app, you would upload the document to a server first
+                    // For this example, we'll just use the file name
+                    const kycDocPath = kycDocument ? kycDocument.name : null;
+                    
+                    const result = await sessionManager.submitKYC({
+                        pan_number: panNumber,
+                        aadhaar_number: aadhaarNumber,
+                        dob: kycDob,
+                        kyc_doc_path: kycDocPath
+                    });
+                    
+                    if (result.success) {
+                        alert('KYC submitted successfully!');
+                        kycModal.style.display = 'none';
+                        setTimeout(() => kycModal.remove(), 300);
+                        loadProfileData(); // Refresh profile view
+                    }
+                } catch (error) {
+                    alert('Error submitting KYC: ' + error.message);
                 }
-            } catch (error) {
-                alert('Error submitting KYC: ' + error.message);
-            }
-        });
+            });
+        }
     }
     
     // Load profile data into edit form
     function loadEditProfileForm(user) {
         if (!user) return;
         
-        document.getElementById('editName').value = user.name || localStorage.getItem('userName') || '';
-        document.getElementById('editEmail').value = user.email || localStorage.getItem('userEmail') || '';
-        document.getElementById('editDob').value = user.dob || localStorage.getItem('userDob') || '';
-        document.getElementById('editGender').value = user.gender || localStorage.getItem('userGender') || '';
-        document.getElementById('editAddress').value = user.address || localStorage.getItem('userAddress') || '';
+        const editName = document.getElementById('editName');
+        const editEmail = document.getElementById('editEmail');
+        const editDob = document.getElementById('editDob');
+        const editGender = document.getElementById('editGender');
+        const editAddress = document.getElementById('editAddress');
         
-        familyMembersContainer.innerHTML = '';
+        if (editName) editName.value = user.name || localStorage.getItem('userName') || '';
+        if (editEmail) editEmail.value = user.email || localStorage.getItem('userEmail') || '';
+        if (editDob) editDob.value = user.dob || localStorage.getItem('userDob') || '';
+        if (editGender) editGender.value = user.gender || localStorage.getItem('userGender') || '';
+        if (editAddress) editAddress.value = user.address || localStorage.getItem('userAddress') || '';
         
-        if (user.familyMembers && user.familyMembers.length > 0) {
-            user.familyMembers.forEach((member, index) => {
-                addFamilyMember(member.name, member.gender, member.relation, member.dob, index === 0);
-            });
-        } else {
-            addFamilyMember('', '', '', '', true);
+        if (familyMembersContainer) {
+            familyMembersContainer.innerHTML = '';
+            
+            if (user.familyMembers && user.familyMembers.length > 0) {
+                user.familyMembers.forEach((member, index) => {
+                    addFamilyMember(member.name, member.gender, member.relation, member.dob, index === 0);
+                });
+            } else {
+                addFamilyMember('', '', '', '', true);
+            }
         }
     }
     
     // Add family member to edit form
     function addFamilyMember(name = '', gender = '', relation = '', dob = '', isFirst = false) {
+        if (!familyMembersContainer) return;
+        
         const memberId = Date.now();
         const memberHtml = `
             <div class="family-member-form" data-id="${memberId}">
@@ -344,94 +360,109 @@ document.addEventListener('DOMContentLoaded', function() {
         familyMembersContainer.insertAdjacentHTML('beforeend', memberHtml);
         
         if (!isFirst) {
-            document.querySelector(`.remove-family-member[data-id="${memberId}"]`).addEventListener('click', function() {
-                this.closest('.family-member-form').remove();
-            });
+            const removeBtn = document.querySelector(`.remove-family-member[data-id="${memberId}"]`);
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function() {
+                    const memberForm = this.closest('.family-member-form');
+                    if (memberForm) memberForm.remove();
+                });
+            }
         }
     }
     
     // Event listeners for profile management
-    profileBtn.addEventListener('click', function() {
-        loadProfileData();
-        profileModal.style.display = 'flex';
-    });
-    
-    cancelEditBtn.addEventListener('click', function() {
-        editProfileModal.style.display = 'none';
-        profileModal.style.display = 'flex';
-    });
-    
-    addFamilyMemberBtn.addEventListener('click', function() {
-        addFamilyMember();
-    });
-    
-    profileForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Collect form data
-        const profileData = {
-            name: document.getElementById('editName').value,
-            email: document.getElementById('editEmail').value,
-            dob: document.getElementById('editDob').value,
-            gender: document.getElementById('editGender').value,
-            address: document.getElementById('editAddress').value,
-            familyMembers: []
-        };
-        
-        // Collect family member data
-        const memberNames = document.querySelectorAll('input[name="memberName[]"]');
-        const memberGenders = document.querySelectorAll('select[name="memberGender[]"]');
-        const memberRelations = document.querySelectorAll('input[name="memberRelation[]"]');
-        const memberDobs = document.querySelectorAll('input[name="memberDob[]"]');
-        
-        for (let i = 0; i < memberNames.length; i++) {
-            if (memberNames[i].value && memberGenders[i].value && memberRelations[i].value) {
-                profileData.familyMembers.push({
-                    name: memberNames[i].value,
-                    gender: memberGenders[i].value,
-                    relation: memberRelations[i].value,
-                    dob: memberDobs[i].value
-                });
-            }
-        }
-        
-        // Validate at least one family member
-        if (profileData.familyMembers.length === 0) {
-            alert('Please add at least one family member');
-            return;
-        }
-        
-        // Update profile via API
-        const success = await sessionManager.updateUserProfile(profileData);
-        
-        if (success) {
-            localStorage.setItem('profileComplete', 'true');
-            // Store basic info in localStorage
-            localStorage.setItem('userName', profileData.name);
-            localStorage.setItem('userEmail', profileData.email);
-            localStorage.setItem('userDob', profileData.dob);
-            localStorage.setItem('userGender', profileData.gender);
-            localStorage.setItem('userAddress', profileData.address);
-            
-            editProfileModal.style.display = 'none';
+    if (profileBtn) {
+        profileBtn.addEventListener('click', function() {
             loadProfileData();
-            profileModal.style.display = 'flex';
-        } else {
-            alert('Failed to update profile. Please try again.');
-        }
-    });
-    
-    if (viewProfileBtn) {
-        viewProfileBtn.addEventListener('click', function() {
-            document.getElementById('successModal').style.display = 'none';
-            loadProfileData();
-            profileModal.style.display = 'flex';
+            if (profileModal) profileModal.style.display = 'flex';
         });
     }
     
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function() {
+            if (editProfileModal) editProfileModal.style.display = 'none';
+            if (profileModal) profileModal.style.display = 'flex';
+        });
+    }
+    
+    if (addFamilyMemberBtn) {
+        addFamilyMemberBtn.addEventListener('click', function() {
+            addFamilyMember();
+        });
+    }
+    
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const profileData = {
+                name: document.getElementById('editName')?.value || '',
+                email: document.getElementById('editEmail')?.value || '',
+                dob: document.getElementById('editDob')?.value || '',
+                gender: document.getElementById('editGender')?.value || '',
+                address: document.getElementById('editAddress')?.value || '',
+                familyMembers: []
+            };
+            
+            // Collect family member data
+            const memberNames = document.querySelectorAll('input[name="memberName[]"]');
+            const memberGenders = document.querySelectorAll('select[name="memberGender[]"]');
+            const memberRelations = document.querySelectorAll('input[name="memberRelation[]"]');
+            const memberDobs = document.querySelectorAll('input[name="memberDob[]"]');
+            
+            for (let i = 0; i < memberNames.length; i++) {
+                if (memberNames[i].value && memberGenders[i].value && memberRelations[i].value) {
+                    profileData.familyMembers.push({
+                        name: memberNames[i].value,
+                        gender: memberGenders[i].value,
+                        relation: memberRelations[i].value,
+                        dob: memberDobs[i].value
+                    });
+                }
+            }
+            
+            // Validate at least one family member
+            if (profileData.familyMembers.length === 0) {
+                alert('Please add at least one family member');
+                return;
+            }
+            
+            // Update profile via API
+            const success = await sessionManager.updateUserProfile(profileData);
+            
+            if (success) {
+                localStorage.setItem('profileComplete', 'true');
+                // Store basic info in localStorage
+                localStorage.setItem('userName', profileData.name);
+                localStorage.setItem('userEmail', profileData.email);
+                localStorage.setItem('userDob', profileData.dob);
+                localStorage.setItem('userGender', profileData.gender);
+                localStorage.setItem('userAddress', profileData.address);
+                
+                if (editProfileModal) editProfileModal.style.display = 'none';
+                loadProfileData();
+                if (profileModal) profileModal.style.display = 'flex';
+            } else {
+                alert('Failed to update profile. Please try again.');
+            }
+        });
+    }
+    
+    if (viewProfileBtn) {
+        viewProfileBtn.addEventListener('click', function() {
+            const successModal = document.getElementById('successModal');
+            if (successModal) successModal.style.display = 'none';
+            loadProfileData();
+            if (profileModal) profileModal.style.display = 'flex';
+        });
+    }
+    
+    // Close modal functionality
     document.querySelectorAll('.close-modal').forEach(closeBtn => {
         closeBtn.addEventListener('click', function() {
-            this.closest('.modal-overlay').style.display = 'none';
+            const modalOverlay = this.closest('.modal-overlay');
+            if (modalOverlay) modalOverlay.style.display = 'none';
         });
     });
     
@@ -441,10 +472,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Mobile menu toggle
-    document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
-        document.querySelector('.main-nav').classList.toggle('active');
+    // Close modal when clicking outside
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
     });
+    
+    // Mobile menu toggle
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+            const mainNav = document.querySelector('.main-nav');
+            if (mainNav) mainNav.classList.toggle('active');
+        });
+    }
 
     // Hero image rotation for all pages
     function initHeroRotation(heroClass, bgClass) {
@@ -536,19 +580,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Intersection Observer for stats animation
     if (statNumbers.length > 0) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    statNumbers.forEach(stat => {
-                        const target = parseInt(stat.getAttribute('data-count'));
-                        animateValue(stat, 0, target, 2000);
-                    });
-                    observer.disconnect();
-                }
-            });
-        }, {threshold: 0.5});
-        
-        observer.observe(document.querySelector('.stats-container'));
+        const statsContainer = document.querySelector('.stats-container');
+        if (statsContainer) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        statNumbers.forEach(stat => {
+                            const target = parseInt(stat.getAttribute('data-count'));
+                            animateValue(stat, 0, target, 2000);
+                        });
+                        observer.disconnect();
+                    }
+                });
+            }, {threshold: 0.5});
+            
+            observer.observe(statsContainer);
+        }
     }
     
     // Gallery filter functionality
@@ -582,9 +629,12 @@ document.addEventListener('DOMContentLoaded', function() {
     amountButtons.forEach(button => {
         button.addEventListener('click', function() {
             // Remove active class from all buttons in this group
-            this.parentElement.querySelectorAll('.amount-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            const parent = this.parentElement;
+            if (parent) {
+                parent.querySelectorAll('.amount-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            }
             // Add active class to clicked button
             this.classList.add('active');
         });
@@ -597,9 +647,9 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             // Basic form validation
-            const name = this.elements['name'].value.trim();
-            const email = this.elements['email'].value.trim();
-            const message = this.elements['message'].value.trim();
+            const name = this.elements['name']?.value.trim() || '';
+            const email = this.elements['email']?.value.trim() || '';
+            const message = this.elements['message']?.value.trim() || '';
             
             if (!name || !email || !message) {
                 alert('Please fill in all required fields');
@@ -628,5 +678,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize UI
     updateUI();
+    fixHeaderButtons();
 });
-
