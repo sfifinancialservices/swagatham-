@@ -1,0 +1,6 @@
+echo "venv/" >> .gitignore
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
+node_modules/
+.env
+.DS_Store

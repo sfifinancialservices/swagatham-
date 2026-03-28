@@ -1,0 +1,74 @@
+-- Swagatham Foundation — MySQL schema for server1.js
+-- Run: mysql -u root -p < database/schema.sql
+
+CREATE DATABASE IF NOT EXISTS swagatham_foundation
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+USE swagatham_foundation;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  phone VARCHAR(20) NOT NULL UNIQUE,
+  name VARCHAR(255) NULL,
+  email VARCHAR(255) NULL,
+  dob DATE NULL,
+  gender VARCHAR(20) NULL,
+  address TEXT NULL,
+  otp_verified TINYINT(1) NOT NULL DEFAULT 0,
+  profile_complete TINYINT(1) NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_users_phone (phone)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS family_members (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  relation VARCHAR(100) NOT NULL,
+  gender VARCHAR(20) NULL,
+  dob DATE NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_family_user (user_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  amount DECIMAL(12, 2) NOT NULL,
+  razorpay_payment_id VARCHAR(255) NOT NULL,
+  status VARCHAR(32) NOT NULL DEFAULT 'success',
+  tax_exemption TINYINT(1) NOT NULL DEFAULT 0,
+  currency VARCHAR(8) NOT NULL DEFAULT 'INR',
+  payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY uk_razorpay_payment (razorpay_payment_id),
+  INDEX idx_payments_user (user_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS kyc_documents (
+  user_id INT UNSIGNED NOT NULL PRIMARY KEY,
+  pan_number VARCHAR(20) NOT NULL,
+  aadhaar_number VARCHAR(20) NOT NULL,
+  date_of_birth DATE NOT NULL,
+  kyc_doc_path VARCHAR(512) NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NULL,
+  action VARCHAR(64) NOT NULL,
+  description TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_audit_user (user_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS admins (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
