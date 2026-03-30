@@ -9,13 +9,17 @@ import './styles/donate.css';
 import './styles/facilities.css';
 import './styles/gallery.css';
 import './styles/editorial-theme.css';
+import './styles/admin.css';
 import App from './App.jsx';
 import { SessionProvider } from './context/SessionContext.jsx';
+import { AdminProvider } from './context/AdminContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <SessionProvider>
-      <App />
+      <AdminProvider>
+        <App />
+      </AdminProvider>
     </SessionProvider>
   </StrictMode>
 );

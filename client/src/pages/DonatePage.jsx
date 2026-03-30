@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import * as api from '../api/sessionApi';
 import { useSession } from '../context/SessionContext';
+import { useAdmin } from '../context/AdminContext';
 
 const RAZORPAY_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js';
 
@@ -31,10 +33,19 @@ function parseAmountFromButton(text) {
 }
 
 export default function DonatePage() {
+  const navigate = useNavigate();
+  const { adminLogin } = useAdmin();
   const { isLoggedIn, login, fetchUserProfile, recordPayment } = useSession();
+  const refreshProfileAfterPayment = useCallback(async () => {
+    try {
+      await fetchUserProfile();
+    } catch {
+      /* ignore */
+    }
+  }, [fetchUserProfile]);
   const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_qKbcwAmDW48jVS';
   const razorpayLogo =
-    typeof window !== 'undefined' ? `${window.location.origin}/logo-mark.svg` : '/logo-mark.svg';
+    typeof window !== 'undefined' ? `${window.location.origin}/logo-rzp.svg` : '/logo-rzp.svg';
 
   const [selectedAmount, setSelectedAmount] = useState(0);
   const [monthlyMode, setMonthlyMode] = useState(false);
@@ -156,6 +167,15 @@ export default function DonatePage() {
     try {
       const result = await api.verifyOTP(phoneNumber.trim(), otp.trim());
       if (result.success) {
+        if (result.userType === 'admin') {
+          adminLogin(result.token);
+          setOtp('');
+          setOtpVisible(false);
+          clearOtpTimer();
+          setOtpOpen(false);
+          navigate('/admin/dashboard', { replace: true });
+          return;
+        }
         login(result.token, !!result.profileComplete);
         localStorage.setItem('userPhone', phoneNumber.trim());
         const user = await fetchUserProfile();
@@ -204,13 +224,21 @@ export default function DonatePage() {
         image: razorpayLogo,
         handler: async (response) => {
           try {
-            await recordPayment({
+            const rec = await recordPayment({
               amount: amt,
               razorpay_payment_id: response.razorpay_payment_id,
               tax_exemption: taxExemption,
+              name: fullName,
+              email,
             });
+            await refreshProfileAfterPayment();
+            const inv = rec.invoiceNo ? `<br/><strong>Invoice:</strong> ${rec.invoiceNo}` : '';
+            const mail =
+              rec.receiptEmailSent === true
+                ? '<br/><em>A receipt has been sent to your email.</em>'
+                : '<br/><small>Save this confirmation for your records. (Configure SMTP on the server to email receipts automatically.)</small>';
             setSuccessHtml(
-              `Thank you for your donation of ₹${amt}!<br/><br/><strong>Payment ID:</strong> ${response.razorpay_payment_id}<br/><strong>Status:</strong> Recorded successfully`
+              `Thank you for your donation of ₹${amt}!${inv}<br/><br/><strong>Payment ID:</strong> ${response.razorpay_payment_id}<br/><strong>Status:</strong> Recorded successfully${mail}`
             );
           } catch (err) {
             setSuccessHtml(

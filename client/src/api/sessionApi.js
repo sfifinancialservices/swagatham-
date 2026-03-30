@@ -65,13 +65,36 @@ export async function submitKYC(token, kyc) {
   return data;
 }
 
-export async function recordPayment(token, { amount, razorpay_payment_id, tax_exemption }) {
+export async function recordPayment(token, { amount, razorpay_payment_id, tax_exemption, name, email }) {
   const res = await fetch(`${API_BASE}/payment`, {
     method: 'POST',
     headers: authHeaders(token),
-    body: JSON.stringify({ amount, razorpay_payment_id, tax_exemption: !!tax_exemption }),
+    body: JSON.stringify({
+      amount,
+      razorpay_payment_id,
+      tax_exemption: !!tax_exemption,
+      name: name?.trim?.() || undefined,
+      email: email?.trim?.() || undefined,
+    }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || 'Payment recording failed');
+  return data;
+}
+
+export async function fetchUserNotifications(token) {
+  const res = await fetch(`${API_BASE}/user/notifications`, { headers: authHeaders(token) });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Failed to load notifications');
+  return data.notifications || [];
+}
+
+export async function markNotificationRead(token, id) {
+  const res = await fetch(`${API_BASE}/user/notifications/${id}/read`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Failed to update');
   return data;
 }

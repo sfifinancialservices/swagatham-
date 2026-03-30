@@ -75,7 +75,18 @@ export default function Header({ onProfileClick }) {
       ) : null}
       <div className="nav-floating-inner">
         <NavLink to="/" className="nav-brand-mark" end>
-          <img src="/logo-mark.svg" alt="Swagatham Foundation" className="nav-brand-logo" />
+          <img
+            src="/logo-mark.svg"
+            alt="Swagatham Foundation"
+            className="nav-brand-logo"
+            width={40}
+            height={40}
+            decoding="async"
+          />
+          <span className="nav-brand-wordmark">
+            <span className="nav-brand-title">Swagatham</span>
+            <span className="nav-brand-sub">Foundation</span>
+          </span>
         </NavLink>
 
         <nav
@@ -83,6 +94,10 @@ export default function Header({ onProfileClick }) {
           className={`nav-pill-shell${menuOpen ? ' active' : ''}`}
           aria-label="Primary"
         >
+          <div className="nav-mobile-brand">
+            <img src="/logo-mark.svg" alt="" width={36} height={36} decoding="async" />
+            <span className="nav-mobile-brand-text">Swagatham</span>
+          </div>
           <div ref={trackRef} className="nav-pill-track">
             <span
               className="nav-pill-indicator"

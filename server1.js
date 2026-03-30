@@ -7,6 +7,7 @@ import twilio from 'twilio';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import { sendDonationReceiptEmail } from './receiptEmail.js';
 
 // Load env variables
 dotenv.config();
@@ -50,7 +51,7 @@ const corsOptions = {
     console.warn('CORS blocked origin:', origin);
     cb(null, false);
   },
-  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
@@ -111,11 +112,11 @@ function generateOTP() {
 }
 
 function generateToken(phone) {
-  return jwt.sign({ phone }, JWT_SECRET, { expiresIn: '24h' });
+  return jwt.sign({ phone, typ: 'user' }, JWT_SECRET, { expiresIn: '24h' });
 }
 
-function generateAdminToken(adminId, username) {
-  return jwt.sign({ adminId, username }, JWT_SECRET, { expiresIn: '1h' });
+function generateAdminToken(phone) {
+  return jwt.sign({ phone, typ: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
 }
 
 function authenticateToken(req, res, next) {
@@ -128,6 +129,12 @@ function authenticateToken(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.typ === 'admin') {
+      return res.status(403).json({ success: false, error: 'Use a user session token' });
+    }
+    if (!decoded.phone) {
+      return res.status(401).json({ success: false, error: 'Token is invalid' });
+    }
     req.user = decoded.phone;
     next();
   } catch (error) {
@@ -138,14 +145,17 @@ function authenticateToken(req, res, next) {
 function authenticateAdmin(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  
+
   if (!token) {
     return res.status(401).json({ success: false, error: 'Admin token is missing' });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.admin = decoded;
+    if (decoded.typ !== 'admin' || !decoded.phone) {
+      return res.status(403).json({ success: false, error: 'Admin access required' });
+    }
+    req.adminPhone = decoded.phone;
     next();
   } catch (error) {
     return res.status(401).json({ success: false, error: 'Admin token is invalid' });
@@ -168,25 +178,15 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// Send OTP endpoint
+// Send OTP — always logs OTP to server console (dev/testing). Optional Twilio SMS when configured.
 app.post('/api/send-otp', otpLimiter, async (req, res) => {
   try {
     const { phoneNumber } = req.body;
 
-    // Validate phone number
     if (!phoneNumber || !/^[6-9]\d{9}$/.test(phoneNumber)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid Indian phone number (10 digits starting with 6-9)' 
-      });
-    }
-    
-    const client = getTwilio();
-    const fromNum = process.env.TWILIO_PHONE_NUMBER;
-    if (!client || !fromNum) {
-      return res.status(503).json({
+      return res.status(400).json({
         success: false,
-        error: 'SMS OTP service is not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER.',
+        error: 'Invalid Indian phone number (10 digits starting with 6-9)',
       });
     }
 
@@ -196,25 +196,34 @@ app.post('/api/send-otp', otpLimiter, async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000,
     });
 
-    try {
-      await client.messages.create({
-        body: `Your OTP for Swagatham Foundation is: ${otp}`,
-        from: fromNum,
-        to: `+91${phoneNumber}`,
-      });
-    } catch (twilioErr) {
-      console.error('[OTP] Twilio SMS failed:', twilioErr.message || twilioErr);
-      otpStore.delete(phoneNumber);
-      return res.status(502).json({
-        success: false,
-        error: 'Unable to send OTP SMS. Please verify Twilio credentials and sender number.',
-      });
+    console.log(
+      `\n┌─────────────────────────────────────────────\n│ [OTP] ${phoneNumber}  →  ${otp}  (valid 5 min)\n└─────────────────────────────────────────────\n`
+    );
+
+    let smsSent = false;
+    const client = getTwilio();
+    const fromNum = process.env.TWILIO_PHONE_NUMBER;
+    if (client && fromNum) {
+      try {
+        await client.messages.create({
+          body: `Your OTP for Swagatham Foundation is: ${otp}`,
+          from: fromNum,
+          to: `+91${phoneNumber}`,
+        });
+        smsSent = true;
+      } catch (twilioErr) {
+        console.warn('[OTP] Twilio SMS failed (SMS optional):', twilioErr.message || twilioErr);
+      }
     }
 
-    res.json({
+    const out = {
       success: true,
-      message: 'OTP sent successfully',
-    });
+      message: smsSent
+        ? 'OTP sent via SMS'
+        : 'OTP generated — check the server terminal for the code (SMS not sent)',
+    };
+    if (!isProd) out.devOtpHint = otp;
+    res.json(out);
   } catch (err) {
     console.error('OTP sending failed:', err);
     res.status(500).json({
@@ -256,38 +265,49 @@ app.post('/api/verify-otp', async (req, res) => {
 
     otpStore.delete(phoneNumber);
     const conn = await db.getConnection();
-    
+
     try {
-      const [users] = await conn.execute(
-        'SELECT id, COALESCE(otp_verified, FALSE) as otp_verified, COALESCE(profile_complete, FALSE) as profile_complete FROM users WHERE phone = ?', 
+      const [adminRows] = await conn.execute(
+        'SELECT id FROM admin_phones WHERE phone = ?',
         [phoneNumber]
       );
-      
+
+      if (adminRows.length > 0) {
+        const adminToken = generateAdminToken(phoneNumber);
+        return res.json({
+          success: true,
+          message: 'Admin OTP verified',
+          token: adminToken,
+          userType: 'admin',
+          profileComplete: true,
+        });
+      }
+
+      const [users] = await conn.execute(
+        'SELECT id, COALESCE(otp_verified, FALSE) as otp_verified, COALESCE(profile_complete, FALSE) as profile_complete FROM users WHERE phone = ?',
+        [phoneNumber]
+      );
+
       let profileComplete = false;
       let otpVerified = false;
-      
+
       if (users.length === 0) {
-        await conn.execute(
-          'INSERT INTO users (phone, otp_verified) VALUES (?, TRUE)', 
-          [phoneNumber]
-        );
+        await conn.execute('INSERT INTO users (phone, otp_verified) VALUES (?, TRUE)', [phoneNumber]);
         otpVerified = true;
       } else {
         profileComplete = !!users[0].profile_complete;
         otpVerified = !!users[0].otp_verified;
         if (!otpVerified) {
-          await conn.execute(
-            'UPDATE users SET otp_verified = TRUE WHERE phone = ?', 
-            [phoneNumber]
-          );
+          await conn.execute('UPDATE users SET otp_verified = TRUE WHERE phone = ?', [phoneNumber]);
         }
       }
-      
+
       const token = generateToken(phoneNumber);
       res.json({
         success: true,
         message: 'OTP verified successfully',
         token,
+        userType: 'user',
         profileComplete: Boolean(profileComplete),
       });
     } finally {
@@ -329,7 +349,7 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
       );
       
       const [payments] = await conn.execute(
-        'SELECT amount, razorpay_payment_id, status, payment_date, tax_exemption FROM payments WHERE user_id = ? ORDER BY payment_date DESC', 
+        'SELECT amount, razorpay_payment_id, status, payment_date, tax_exemption, invoice_number FROM payments WHERE user_id = ? ORDER BY payment_date DESC',
         [user.id]
       );
       
@@ -444,11 +464,11 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
   }
 });
 
-// Record payment endpoint
+// Record payment endpoint — syncs donor name/email to profile, assigns invoice no., emails receipt when SMTP is set
 app.post('/api/payment', authenticateToken, async (req, res) => {
   try {
     const phone = req.user;
-    const { amount, razorpay_payment_id, tax_exemption = false } = req.body;
+    const { amount, razorpay_payment_id, tax_exemption = false, name, email } = req.body;
 
     const rid =
       typeof razorpay_payment_id === 'string' ? razorpay_payment_id.trim() : String(razorpay_payment_id || '');
@@ -467,12 +487,21 @@ app.post('/api/payment', authenticateToken, async (req, res) => {
       });
     }
 
+    const donorName = typeof name === 'string' ? name.trim() : '';
+    const donorEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (donorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid email address',
+      });
+    }
+
     const conn = await db.getConnection();
 
     try {
       await conn.beginTransaction();
 
-      const [user] = await conn.execute('SELECT id FROM users WHERE phone = ?', [phone]);
+      const [user] = await conn.execute('SELECT id, name, email FROM users WHERE phone = ?', [phone]);
 
       if (user.length === 0) {
         await conn.rollback();
@@ -485,7 +514,7 @@ app.post('/api/payment', authenticateToken, async (req, res) => {
       const userId = user[0].id;
 
       const [existing] = await conn.execute(
-        'SELECT id FROM payments WHERE razorpay_payment_id = ? LIMIT 1',
+        'SELECT id, invoice_number FROM payments WHERE razorpay_payment_id = ? LIMIT 1',
         [rid]
       );
       if (existing.length > 0) {
@@ -495,32 +524,76 @@ app.post('/api/payment', authenticateToken, async (req, res) => {
           message: 'Payment already recorded',
           paymentId: rid,
           duplicate: true,
+          invoiceNo: existing[0].invoice_number || null,
         });
       }
 
-      await conn.execute(
+      const [insertResult] = await conn.execute(
         `INSERT INTO payments
          (user_id, amount, razorpay_payment_id, status, tax_exemption, currency)
          VALUES (?, ?, ?, 'success', ?, 'INR')`,
         [userId, amt, rid, Boolean(tax_exemption)]
       );
 
+      const paymentRowId = insertResult.insertId;
+      const year = new Date().getFullYear();
+      const invoiceNo = `SWG-${year}-${String(paymentRowId).padStart(6, '0')}`;
+
+      try {
+        await conn.execute('UPDATE payments SET invoice_number = ? WHERE id = ?', [invoiceNo, paymentRowId]);
+      } catch (invErr) {
+        if (invErr.code === 'ER_BAD_FIELD_ERROR') {
+          console.warn(
+            '[Payment] invoice_number column missing — run database/migrations/003_payment_invoice_number.sql'
+          );
+        } else {
+          throw invErr;
+        }
+      }
+
+      await conn.execute('UPDATE users SET name = ?, email = ? WHERE id = ?', [
+        donorName || user[0].name || null,
+        donorEmail || user[0].email || null,
+        userId,
+      ]);
+
       try {
         await conn.execute(
           `INSERT INTO audit_log
          (user_id, action, description)
          VALUES (?, 'payment', ?)`,
-          [userId, `Payment of ₹${amt} recorded with ID: ${rid}`]
+          [userId, `Payment of ₹${amt} recorded with ID: ${rid} (${invoiceNo})`]
         );
       } catch (auditErr) {
         console.warn('audit_log insert skipped:', auditErr.message);
       }
 
       await conn.commit();
+
+      let receiptEmailSent = false;
+      const receiptTo = donorEmail || user[0].email;
+      if (receiptTo && invoiceNo) {
+        const mailResult = await sendDonationReceiptEmail({
+          to: receiptTo,
+          donorName: donorName || user[0].name || 'Donor',
+          amount: amt,
+          currency: 'INR',
+          razorpayPaymentId: rid,
+          invoiceNo,
+          taxExemption: Boolean(tax_exemption),
+          paymentDate: new Date(),
+        });
+        receiptEmailSent = mailResult.sent;
+      } else if (!receiptTo) {
+        console.log('[Receipt] No email on file — skipped (add donor email in payment form).');
+      }
+
       res.json({
         success: true,
         message: 'Payment recorded successfully',
         paymentId: rid,
+        invoiceNo,
+        receiptEmailSent,
       });
     } catch (err) {
       await conn.rollback();
@@ -597,60 +670,12 @@ app.post('/api/kyc', authenticateToken, async (req, res) => {
   }
 });
 
-// Admin login endpoint
+// Legacy password login — disabled; admins use the same OTP flow as users (admin_phones).
 app.post('/api/admin/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Username and password are required' 
-      });
-    }
-
-    const conn = await db.getConnection();
-    
-    try {
-      const [admin] = await conn.execute(
-        'SELECT id, password_hash FROM admins WHERE username = ?', 
-        [username]
-      );
-      
-      if (admin.length === 0) {
-        return res.status(401).json({ 
-          success: false, 
-          error: 'Invalid credentials' 
-        });
-      }
-
-      // In a real application, use bcrypt to compare hashed passwords
-      // This is just a placeholder for demonstration
-      if (admin[0].password_hash !== password) {
-        return res.status(401).json({ 
-          success: false, 
-          error: 'Invalid credentials' 
-        });
-      }
-
-      const token = generateAdminToken(admin[0].id, username);
-
-      res.json({ 
-        success: true, 
-        message: 'Login successful',
-        token
-      });
-    } finally {
-      conn.release();
-    }
-  } catch (err) {
-    console.error('Admin login error:', err);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Error during login',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
+  res.status(410).json({
+    success: false,
+    error: 'Use phone OTP. Open /admin and sign in with an admin-registered number.',
+  });
 });
 
 // Admin dashboard stats endpoint
@@ -689,6 +714,154 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
       error: 'Error retrieving admin statistics',
       details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
+  }
+});
+
+app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
+  try {
+    const conn = await db.getConnection();
+    try {
+      const [rows] = await conn.execute(`
+        SELECT u.id, u.phone, u.name, u.email, u.dob, u.gender, u.address,
+          COALESCE(u.profile_complete, 0) AS profile_complete,
+          u.created_at,
+          (SELECT COUNT(*) FROM payments p WHERE p.user_id = u.id AND p.status = 'success') AS payment_count,
+          (SELECT COALESCE(SUM(amount), 0) FROM payments p WHERE p.user_id = u.id AND p.status = 'success') AS total_paid
+        FROM users u
+        ORDER BY u.created_at DESC
+      `);
+      const complete = rows.filter((r) => r.profile_complete);
+      const incomplete = rows.filter((r) => !r.profile_complete);
+      res.json({ success: true, users: rows, complete, incomplete });
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    console.error('Admin users list error:', err);
+    res.status(500).json({ success: false, error: 'Failed to list users' });
+  }
+});
+
+app.get('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isFinite(id) || id <= 0) {
+    return res.status(400).json({ success: false, error: 'Invalid user id' });
+  }
+  try {
+    const conn = await db.getConnection();
+    try {
+      const [userData] = await conn.execute('SELECT * FROM users WHERE id = ?', [id]);
+      if (userData.length === 0) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+      const user = userData[0];
+      const [family] = await conn.execute(
+        'SELECT name, relation, gender, dob FROM family_members WHERE user_id = ?',
+        [id]
+      );
+      const [payments] = await conn.execute(
+        'SELECT amount, razorpay_payment_id, status, payment_date, tax_exemption, invoice_number FROM payments WHERE user_id = ? ORDER BY payment_date DESC',
+        [id]
+      );
+      const [kyc] = await conn.execute(
+        'SELECT pan_number, aadhaar_number, kyc_doc_path FROM kyc_documents WHERE user_id = ?',
+        [id]
+      );
+      res.json({
+        success: true,
+        user: {
+          ...user,
+          profile_complete: Boolean(user.profile_complete),
+          familyMembers: family,
+          payments,
+          kycDocuments: kyc.length > 0 ? kyc[0] : null,
+        },
+      });
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    console.error('Admin user detail error:', err);
+    res.status(500).json({ success: false, error: 'Failed to load user' });
+  }
+});
+
+app.post('/api/admin/notifications', authenticateAdmin, async (req, res) => {
+  try {
+    const { userId, message } = req.body;
+    const uid = parseInt(userId, 10);
+    if (!Number.isFinite(uid) || uid <= 0 || !message || !String(message).trim()) {
+      return res.status(400).json({ success: false, error: 'userId and message are required' });
+    }
+    const conn = await db.getConnection();
+    try {
+      const [u] = await conn.execute('SELECT id FROM users WHERE id = ?', [uid]);
+      if (u.length === 0) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+      const [r] = await conn.execute(
+        'INSERT INTO user_notifications (user_id, message) VALUES (?, ?)',
+        [uid, String(message).trim()]
+      );
+      res.json({ success: true, id: r.insertId, message: 'Notification sent' });
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    console.error('Admin notification error:', err);
+    res.status(500).json({ success: false, error: 'Failed to send notification' });
+  }
+});
+
+app.get('/api/user/notifications', authenticateToken, async (req, res) => {
+  try {
+    const phone = req.user;
+    const conn = await db.getConnection();
+    try {
+      const [userRows] = await conn.execute('SELECT id FROM users WHERE phone = ?', [phone]);
+      if (userRows.length === 0) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+      const userId = userRows[0].id;
+      const [rows] = await conn.execute(
+        'SELECT id, message, read_at, created_at FROM user_notifications WHERE user_id = ? ORDER BY created_at DESC',
+        [userId]
+      );
+      res.json({ success: true, notifications: rows });
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    console.error('User notifications error:', err);
+    res.status(500).json({ success: false, error: 'Failed to load notifications' });
+  }
+});
+
+app.put('/api/user/notifications/:id/read', authenticateToken, async (req, res) => {
+  try {
+    const phone = req.user;
+    const nid = parseInt(req.params.id, 10);
+    if (!Number.isFinite(nid) || nid <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid id' });
+    }
+    const conn = await db.getConnection();
+    try {
+      const [userRows] = await conn.execute('SELECT id FROM users WHERE phone = ?', [phone]);
+      if (userRows.length === 0) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+      const userId = userRows[0].id;
+      const [r] = await conn.execute(
+        'UPDATE user_notifications SET read_at = NOW() WHERE id = ? AND user_id = ?',
+        [nid, userId]
+      );
+      res.json({ success: true, updated: r.affectedRows > 0 });
+    } finally {
+      conn.release();
+    }
+  } catch (err) {
+    console.error('Mark notification read error:', err);
+    res.status(500).json({ success: false, error: 'Failed to update' });
   }
 });
 

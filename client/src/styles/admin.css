@@ -1,0 +1,323 @@
+/* Admin auth & dashboard (outside MainLayout) */
+
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(160deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 26rem;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(30, 58, 138, 0.12);
+  box-shadow: 0 12px 40px rgba(30, 58, 138, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-login-logo {
+  align-self: center;
+  border-radius: 0.75rem;
+}
+
+.admin-login-card h1 {
+  font-size: 1.5rem;
+  color: var(--dark-blue);
+  text-align: center;
+  margin: 0;
+}
+
+.admin-login-hint {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 0.5rem;
+  line-height: 1.5;
+}
+
+.admin-login-card label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dark-blue);
+}
+
+.admin-login-card input,
+.admin-login-card textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(30, 58, 138, 0.2);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.admin-dashboard {
+  min-height: 100vh;
+  background: #f1f5f9;
+  padding: 1.25rem;
+  padding-bottom: 3rem;
+}
+
+.admin-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin-dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-dashboard-brand h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--dark-blue);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto 2rem;
+}
+
+.admin-stat-card {
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+.admin-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark-blue);
+}
+
+.admin-notify-section {
+  max-width: 72rem;
+  margin: 0 auto 2rem;
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.admin-notify-section h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--dark-blue);
+}
+
+.admin-help {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0 0 1rem;
+}
+
+.admin-notify-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-notify-row select,
+.admin-notify-row textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(30, 58, 138, 0.2);
+  border-radius: 0.5rem;
+  font-family: inherit;
+}
+
+.admin-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1.5rem;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.admin-user-list {
+  background: #fff;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+}
+
+.admin-user-list h2 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  color: var(--dark-blue);
+}
+
+.admin-user-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+.admin-user-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  border: none;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.admin-user-link:hover {
+  background: rgba(0, 191, 255, 0.12);
+}
+
+.admin-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.admin-detail-card {
+  background: #fff;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  position: relative;
+}
+
+.admin-detail-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  border: none;
+  background: #f1f5f9;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.admin-dashboard-loading,
+.admin-dashboard-error {
+  text-align: center;
+  max-width: 72rem;
+  margin: 0 auto 1rem;
+}
+
+.admin-dashboard-error {
+  color: #b91c1c;
+}
+
+/* User notification banners (main site) */
+.user-notification-stack {
+  position: relative;
+  z-index: 1005;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-notification-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(90deg, rgba(0, 191, 255, 0.15), rgba(30, 58, 138, 0.1));
+  border: 1px solid rgba(30, 58, 138, 0.2);
+  border-radius: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.user-notification-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.45;
+}
+
+.user-notification-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: var(--dark-blue);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* Mobile menu: logo + title inside drawer */
+.nav-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(30, 58, 138, 0.1);
+  width: 100%;
+  justify-content: center;
+}
+
+.nav-mobile-brand-text {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--dark-blue);
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 900px) {
+  .nav-pill-shell .nav-mobile-brand {
+    display: flex;
+  }
+}
+
+@media (min-width: 901px) {
+  .nav-mobile-brand {
+    display: none !important;
+  }
+}

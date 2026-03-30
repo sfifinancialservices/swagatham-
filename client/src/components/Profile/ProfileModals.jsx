@@ -292,6 +292,12 @@ export default function ProfileModals({ open, onClose }) {
                             </div>
                             <div className="payment-id">Payment ID: {p.razorpay_payment_id}</div>
                             <div className="payment-meta">
+                              {p.invoice_number ? (
+                                <>
+                                  Invoice: {p.invoice_number}
+                                  <br />
+                                </>
+                              ) : null}
                               Date: {new Date(p.payment_date).toLocaleDateString()} |{' '}
                               {p.tax_exemption ? '80G requested' : 'Standard donation'}
                             </div>

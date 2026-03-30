@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import ProfileModals from '../Profile/ProfileModals';
+import UserNotificationBanner from '../UserNotificationBanner';
 
 const BODY_CLASS = {
   '/': 'index-page',
@@ -28,6 +29,7 @@ export default function MainLayout() {
   return (
     <>
       <Header onProfileClick={() => setProfileOpen(true)} />
+      <UserNotificationBanner />
       <Outlet />
       <Footer />
       <ProfileModals open={profileOpen} onClose={() => setProfileOpen(false)} />

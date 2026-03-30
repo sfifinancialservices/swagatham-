@@ -8,7 +8,7 @@ body.editorial-app {
   font-family: var(--font-body), system-ui, sans-serif;
   --editorial-nav-top: clamp(0.5rem, 1.5vw, 0.85rem);
   --editorial-nav-max-w: min(1120px, calc(100% - clamp(0.75rem, 4vw, 2rem)));
-  --editorial-nav-logo-h: clamp(2.125rem, 3.2vw + 1.25rem, 3rem);
+  --editorial-nav-logo-h: clamp(2rem, 1.5vw + 1.35rem, 2.5rem);
   --editorial-nav-link-fs: clamp(0.8125rem, 0.35rem + 1.1vw, 0.9375rem);
   --editorial-nav-link-pad-x: clamp(0.65rem, 0.5rem + 1vw, 1.05rem);
   --editorial-nav-link-pad-y: clamp(0.42rem, 0.35rem + 0.6vw, 0.62rem);
@@ -101,16 +101,47 @@ body.editorial-app .hero-bg {
 .nav-brand-mark {
   display: flex;
   align-items: center;
+  gap: clamp(0.5rem, 1vw, 0.85rem);
   text-decoration: none;
   flex-shrink: 0;
+  color: inherit;
+  min-width: 0;
 }
 
 .nav-brand-logo {
   height: var(--editorial-nav-logo-h);
-  width: auto;
-  max-height: 3rem;
-  border-radius: 10px;
+  width: var(--editorial-nav-logo-h);
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  max-height: 3.75rem;
+  border-radius: 12px;
   display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.nav-brand-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  line-height: 1.12;
+  min-width: 0;
+}
+
+.nav-brand-title {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: clamp(1.05rem, 0.6rem + 1.1vw, 1.4rem);
+  font-weight: 700;
+  color: var(--deep-sky-blue);
+  letter-spacing: -0.02em;
+}
+
+.nav-brand-sub {
+  font-size: clamp(0.68rem, 0.55rem + 0.35vw, 0.8rem);
+  font-weight: 600;
+  color: var(--dark-blue);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .nav-pill-shell {
@@ -267,6 +298,17 @@ body.editorial-app .hero-bg {
   .nav-brand-mark {
     flex: 0 1 auto;
     min-width: 0;
+  }
+
+  .nav-brand-wordmark {
+    display: none;
+  }
+
+  .nav-brand-logo {
+    width: auto;
+    max-height: 3rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
   }
 
   .nav-floating-actions {

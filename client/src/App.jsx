@@ -6,11 +6,15 @@ import ContactPage from './pages/ContactPage';
 import DonatePage from './pages/DonatePage';
 import FacilitiesPage from './pages/FacilitiesPage';
 import GalleryPage from './pages/GalleryPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/admin" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
