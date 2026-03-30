@@ -33,6 +33,8 @@ function parseAmountFromButton(text) {
 export default function DonatePage() {
   const { isLoggedIn, login, fetchUserProfile, recordPayment } = useSession();
   const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_qKbcwAmDW48jVS';
+  const razorpayLogo =
+    typeof window !== 'undefined' ? `${window.location.origin}/logo-mark.svg` : '/logo-mark.svg';
 
   const [selectedAmount, setSelectedAmount] = useState(0);
   const [monthlyMode, setMonthlyMode] = useState(false);
@@ -199,7 +201,7 @@ export default function DonatePage() {
         currency: 'INR',
         name: 'Swagatham Foundation',
         description: donationType === 'monthly' ? 'Monthly Donation' : 'One-Time Donation',
-        image: '/images/logo.png',
+        image: razorpayLogo,
         handler: async (response) => {
           try {
             await recordPayment({

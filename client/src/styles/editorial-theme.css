@@ -35,14 +35,9 @@ body.editorial-app .hero-content h1 {
   letter-spacing: -0.035em;
 }
 
-/* Home hero — show photos clearly (blue tint, no heavy blur) */
+/* Home hero — natural image look (no blue wash) */
 body.editorial-app .hero-overlay {
-  background: linear-gradient(
-    120deg,
-    rgba(30, 58, 138, 0.45) 0%,
-    rgba(30, 58, 138, 0.58) 50%,
-    rgba(12, 74, 110, 0.5) 100%
-  );
+  background: rgba(0, 0, 0, 0.4);
 }
 
 body.editorial-app .hero-bg {
@@ -439,7 +434,7 @@ body.editorial-app .marquee-strip__item {
 
 .section-editorial--accent {
   background:
-    linear-gradient(125deg, rgba(30, 58, 138, 0.88) 0%, rgba(30, 58, 138, 0.75) 100%),
+    linear-gradient(125deg, rgba(0, 0, 0, 0.62) 0%, rgba(0, 0, 0, 0.45) 100%),
     url('/images/donation-bg.jpg') center/cover no-repeat;
   color: #fff;
 }
@@ -778,6 +773,168 @@ body.editorial-app .split-auth-stat-value {
   background: linear-gradient(90deg, var(--deep-sky-blue), var(--sky-blue), var(--warm-orange));
 }
 
+/* ---------- Profile / modal refresh ---------- */
+.editorial-app .modal-overlay {
+  background: rgba(2, 6, 23, 0.58);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.editorial-app .modal-container {
+  background: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(30, 58, 138, 0.12);
+  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.24);
+}
+
+.editorial-app .modal-container h2 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.editorial-app .profile-view {
+  max-width: min(860px, 94vw);
+  max-height: 88vh;
+  padding: 1.75rem;
+}
+
+.editorial-app .profile-details {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.editorial-app .profile-detail label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.editorial-app .profile-detail span {
+  background: #f8fafc;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.editorial-app .family-members-list,
+.editorial-app .donation-history,
+.editorial-app .kyc-section {
+  margin-top: 1.15rem;
+  background: #fff;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+  border-radius: 0.85rem;
+  padding: 1rem;
+}
+
+.editorial-app .payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.editorial-app .payment-summary-card {
+  background: #f8fafc;
+  border: 1px solid rgba(30, 58, 138, 0.1);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.editorial-app .payment-summary-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.editorial-app .payment-category h4 {
+  margin: 0.85rem 0 0.45rem;
+  font-size: 0.86rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #334155;
+}
+
+.editorial-app .donation-item {
+  border: 1px solid rgba(30, 58, 138, 0.1);
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.55rem;
+  background: #fff;
+}
+
+.editorial-app .donation-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.editorial-app .payment-status {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-weight: 600;
+}
+
+.editorial-app .payment-status--success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.editorial-app .payment-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.editorial-app .payment-status--failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.editorial-app .payment-status--other {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.editorial-app .payment-id,
+.editorial-app .payment-meta {
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.editorial-app .profile-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.editorial-app .profile-actions .btn-primary,
+.editorial-app .profile-actions .btn-secondary {
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+}
+
+.editorial-app .success-modal {
+  background: rgba(2, 6, 23, 0.58);
+  backdrop-filter: blur(4px);
+}
+
+.editorial-app .success-modal-content {
+  border-radius: 1rem;
+  border: 1px solid rgba(30, 58, 138, 0.12);
+  box-shadow: 0 24px 54px rgba(2, 6, 23, 0.24);
+}
+
 /* ---------- Profile loading ---------- */
 .profile-loading {
   text-align: center;
@@ -1044,13 +1201,13 @@ body.editorial-app .donate-hero {
   box-sizing: border-box;
 }
 
-/* Single even wash — avoids diagonal “two-tone” look on photos */
+/* Neutral wash on inner page hero images */
 body.editorial-app .about-hero::before,
 body.editorial-app .contact-hero::before,
 body.editorial-app .facilities-hero::before,
 body.editorial-app .gallery-hero::before,
 body.editorial-app .donate-hero::before {
-  background: rgba(30, 58, 138, 0.52);
+  background: rgba(0, 0, 0, 0.42);
 }
 
 body.editorial-app .about-hero h1,

@@ -7,6 +7,19 @@ function nextMemberId() {
   return memberId;
 }
 
+function amountValue(x) {
+  const n = Number(x);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatCurrency(n) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amountValue(n));
+}
+
 export default function ProfileModals({ open, onClose }) {
   const {
     fetchUserProfile,
@@ -49,6 +62,52 @@ export default function ProfileModals({ open, onClose }) {
   }, [open, load]);
 
   const showEditProfile = Boolean(user) && !Boolean(user.profileComplete);
+  const payments = Array.isArray(user?.payments) ? user.payments : [];
+  const paymentSummary = payments.reduce(
+    (acc, p) => {
+      const status = String(p.status || 'success').toLowerCase();
+      const amt = amountValue(p.amount);
+      acc.totalAmount += amt;
+      acc.totalCount += 1;
+      if (status === 'success') {
+        acc.successAmount += amt;
+        acc.successCount += 1;
+      } else if (status === 'failed') {
+        acc.failedCount += 1;
+      } else {
+        acc.pendingCount += 1;
+      }
+      if (p.tax_exemption) {
+        acc.taxExemptCount += 1;
+      } else {
+        acc.standardCount += 1;
+      }
+      return acc;
+    },
+    {
+      totalAmount: 0,
+      totalCount: 0,
+      successAmount: 0,
+      successCount: 0,
+      failedCount: 0,
+      pendingCount: 0,
+      taxExemptCount: 0,
+      standardCount: 0,
+    }
+  );
+  const groupedPayments = payments.reduce((acc, p) => {
+    const status = String(p.status || 'success').toLowerCase();
+    const key = status === 'success' || status === 'failed' || status === 'pending' ? status : 'other';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(p);
+    return acc;
+  }, {});
+  const paymentGroups = [
+    ['success', 'Successful Payments'],
+    ['pending', 'Pending Payments'],
+    ['failed', 'Failed Payments'],
+    ['other', 'Other Payments'],
+  ].filter(([k]) => (groupedPayments[k] || []).length > 0);
 
   const openEdit = () => {
     if (!user) return;
@@ -200,14 +259,44 @@ export default function ProfileModals({ open, onClose }) {
                   </div>
                 )}
 
-                {user.payments?.length > 0 && (
+                {payments.length > 0 && (
                   <div className="donation-history">
                     <h3>Donation History</h3>
-                    {user.payments.map((p) => (
-                      <div key={p.razorpay_payment_id} className="donation-item">
-                        <strong>₹{p.amount}</strong> — {new Date(p.payment_date).toLocaleDateString()}
-                        <div className="payment-id">Payment ID: {p.razorpay_payment_id}</div>
-                        <div className="payment-status">Status: {p.status || 'completed'}</div>
+                    <div className="payment-summary-grid">
+                      <div className="payment-summary-card">
+                        <span className="payment-summary-label">Total Contributions</span>
+                        <strong>{formatCurrency(paymentSummary.totalAmount)}</strong>
+                        <small>{paymentSummary.totalCount} transactions</small>
+                      </div>
+                      <div className="payment-summary-card">
+                        <span className="payment-summary-label">Successful</span>
+                        <strong>{formatCurrency(paymentSummary.successAmount)}</strong>
+                        <small>{paymentSummary.successCount} completed</small>
+                      </div>
+                      <div className="payment-summary-card">
+                        <span className="payment-summary-label">Tax Categories</span>
+                        <strong>{paymentSummary.taxExemptCount} 80G</strong>
+                        <small>{paymentSummary.standardCount} standard</small>
+                      </div>
+                    </div>
+                    {paymentGroups.map(([key, title]) => (
+                      <div key={key} className="payment-category">
+                        <h4>{title}</h4>
+                        {groupedPayments[key].map((p) => (
+                          <div key={p.razorpay_payment_id} className="donation-item">
+                            <div className="donation-item-top">
+                              <strong>{formatCurrency(p.amount)}</strong>
+                              <span className={`payment-status payment-status--${key}`}>
+                                {(p.status || key).toString().toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="payment-id">Payment ID: {p.razorpay_payment_id}</div>
+                            <div className="payment-meta">
+                              Date: {new Date(p.payment_date).toLocaleDateString()} |{' '}
+                              {p.tax_exemption ? '80G requested' : 'Standard donation'}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ))}
                   </div>

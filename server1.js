@@ -181,44 +181,40 @@ app.post('/api/send-otp', otpLimiter, async (req, res) => {
       });
     }
     
+    const client = getTwilio();
+    const fromNum = process.env.TWILIO_PHONE_NUMBER;
+    if (!client || !fromNum) {
+      return res.status(503).json({
+        success: false,
+        error: 'SMS OTP service is not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER.',
+      });
+    }
+
     const otp = generateOTP();
     otpStore.set(phoneNumber, {
       otp,
       expiresAt: Date.now() + 5 * 60 * 1000,
     });
 
-    const client = getTwilio();
-    const fromNum = process.env.TWILIO_PHONE_NUMBER;
-    let smsSent = false;
-
-    if (client && fromNum) {
-      try {
-        await client.messages.create({
-          body: `Your OTP for Swagatham Foundation is: ${otp}`,
-          from: fromNum,
-          to: `+91${phoneNumber}`,
-        });
-        smsSent = true;
-      } catch (twilioErr) {
-        console.warn('[OTP] Twilio SMS failed:', twilioErr.message || twilioErr);
-        console.warn(
-          `[OTP] Use this OTP for +91${phoneNumber}: ${otp} (fix TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER if you need real SMS)`
-        );
-      }
-    } else {
-      console.warn(
-        `[OTP] Twilio not configured — OTP for ${phoneNumber}: ${otp} (set TWILIO_* in .env to send SMS)`
-      );
+    try {
+      await client.messages.create({
+        body: `Your OTP for Swagatham Foundation is: ${otp}`,
+        from: fromNum,
+        to: `+91${phoneNumber}`,
+      });
+    } catch (twilioErr) {
+      console.error('[OTP] Twilio SMS failed:', twilioErr.message || twilioErr);
+      otpStore.delete(phoneNumber);
+      return res.status(502).json({
+        success: false,
+        error: 'Unable to send OTP SMS. Please verify Twilio credentials and sender number.',
+      });
     }
 
-    const out = {
+    res.json({
       success: true,
-      message: smsSent
-        ? 'OTP sent successfully'
-        : 'OTP generated (check server logs if SMS was not delivered)',
-    };
-    if (!isProd && !smsSent) out.devOtpHint = otp;
-    res.json(out);
+      message: 'OTP sent successfully',
+    });
   } catch (err) {
     console.error('OTP sending failed:', err);
     res.status(500).json({

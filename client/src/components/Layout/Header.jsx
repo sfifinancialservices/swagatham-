@@ -75,7 +75,7 @@ export default function Header({ onProfileClick }) {
       ) : null}
       <div className="nav-floating-inner">
         <NavLink to="/" className="nav-brand-mark" end>
-          <img src="/images/logo.png" alt="Swagatham Foundation" className="nav-brand-logo" />
+          <img src="/logo-mark.svg" alt="Swagatham Foundation" className="nav-brand-logo" />
         </NavLink>
 
         <nav

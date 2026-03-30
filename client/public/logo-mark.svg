@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Swagatham Foundation Logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00BFFF"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#bg)"/>
+  <circle cx="256" cy="200" r="86" fill="#ffffff" opacity="0.95"/>
+  <path d="M138 350c22-48 69-78 118-78s96 30 118 78" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round"/>
+  <path d="M188 194c24 26 45 38 68 38s44-12 68-38" fill="none" stroke="#1E3A8A" stroke-width="16" stroke-linecap="round"/>
+</svg>
